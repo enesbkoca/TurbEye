@@ -72,7 +72,7 @@ class Motor:
 
     def coefficients(self):
         M = self.Propeller.M
-        self.Kt =
+        self.Kt = M
 
 class Propeller:
 
