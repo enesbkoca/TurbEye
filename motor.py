@@ -2,7 +2,6 @@ from propeller import Propeller
 
 
 class Motor:
-
     def __init__(self, Kv0, Um0, Im0, Rm, Immax, mass, Propeller):
         # Motor characteristics
         self.Kv0 = Kv0  # KV value of the motor
@@ -13,10 +12,11 @@ class Motor:
         self.mass = mass
 
         self.propeller = Propeller
-        self.VandI()
 
-    def VandI(self):
-        M = self.propeller.M
-        N = self.propeller.N
-        self.Im = M*self.Kv0*self.Um0/9.55/(self.Um0-self.Im0*self.Rm)
-        self.Um = self.Im*self.Rm + (self.Um0-self.Im0*self.Rm)/(self.Kv0*self.Um0)*N
+    def VandI(self, M, N):
+        Im = M * self.Kv0 * self.Um0 / 9.55 / (self.Um0 - self.Im0 * self.Rm)
+        Um = (
+            self.Im * self.Rm
+            + (self.Um0 - self.Im0 * self.Rm) / (self.Kv0 * self.Um0) * N
+        )
+        return Im, Um
