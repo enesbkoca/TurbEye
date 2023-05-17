@@ -15,11 +15,14 @@ K0 = 6.11
 class Propeller:
 
     def __init__(self, Dp, Hp, Bp, mass, N):
-        self.Dp = Dp
-        self.Hp = Hp
-        self.Bp = Bp
+        # Propeller characteristics
+        self.Dp = Dp  # Propeller diameter
+        self.Hp = Hp  # Propeller pitch
+        self.Bp = Bp  # Number of blades in propeller
+
         self.mass = mass
-        self.N = N
+        self.N = N  # revolutions per minute (rpm)
+
         self.coefficients()
         self.forces()
 

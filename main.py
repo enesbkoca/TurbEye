@@ -1,4 +1,6 @@
 import numpy as np
+from propeller import Propeller
+from motor import Motor
 
 
 # Mass budget inputs
@@ -24,17 +26,8 @@ class Drone:
         self.Coaxial = Coaxial  # Coaxial or conventional propeller setup
         self.Hydrogen = Hydrogen  # Hydrogen or battery powered
 
-        # Motor characteristics
-        self.Kv0 = Motor.Kv0  # KV value of the motor
-        self.Um0 = Motor.Um0  # No load Voltage
-        self.Im0 = Motor.Im0  # No load current
-        self.Rm = Motor.Rm  # Motor resistance
-        self.Immax = Motor.Immax  # Motor max current
-
-        # Propeller characteristics
-        self.Dp = Propeller.Dp  # Propeller diameter
-        self.Hp = Propeller.Hp  # Propeller pitch
-        self.Bp = Propeller.Bp  # Number of blades in propeller
+        self.motor = Motor
+        self.propeller = Propeller
 
         self.m_prop = Propeller.mass * Nm  # Mass of the propellers
         self.m_motor = Motor.mass * Nm  # Mass of the motors
