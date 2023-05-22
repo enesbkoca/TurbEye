@@ -45,7 +45,7 @@ class Propeller:
             * (epsilon * np.arctan2(self.Hp, np.pi * self.Dp) - alpha0) ** 2
             / (np.pi * A + K0) ** 2
         )
-        Cm = 1 / 8 / A * np.pi**2 * self.Cd * zeta**2 * labda * self.Bp**2
+        Cm = 1 / 8 / A * np.pi**2 * Cd * zeta**2 * labda * self.Bp**2
         return Ct, Cd, Cm
 
     def forces(self, N):

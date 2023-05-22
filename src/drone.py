@@ -31,19 +31,16 @@ class Drone:
     def compute_weight(self, x, max_iter=1000) -> None:
         # x = [0.5, 0.2, 2, 0.034, 100, 10, 0.4, 0.27, 19, 0.128, 3, 8, 2]
         if x is not None:
-            self.T = x[10]
-            self.Nm = x[11]
-            self.TW_R = x[12]
+            # self.Nm = x[8]
+            # self.TW_R = x[9]
             self.propeller.Dp = x[0]
             self.propeller.Hp = x[1]
             self.propeller.Bp = x[2]
-            self.propeller.mass = x[3]
-            self.motor.Kv0 = x[4]
-            self.motor.Um0 = x[5]
-            self.motor.Im0 = x[6]
-            self.motor.Rm = x[7]
-            self.motor.Immax = x[8]
-            self.motor.mass = x[9]
+            self.motor.Kv0 = x[3]
+            # self.motor.Um0 = x[4]
+            # self.motor.Im0 = x[5]
+            # self.motor.Rm = x[6]
+            # self.motor.Immax = x[7]
         m_prop = self.propeller.mass * self.Nm  # Mass of the propellers
         m_motor = self.motor.mass * self.Nm  # Mass of the motors
         m_tot = (
@@ -62,7 +59,7 @@ class Drone:
             T_req = m_tot * 9.80665
             T_req_m = T_req / self.Nm
             N = self.propeller.required_rpm(T_req_m)
-            M = self.propeller.forces(N)
+            M = self.propeller.forces(N)[1]
             IV = self.motor.VandI(M, N)
             P = IV[0] * IV[1]
             P_tot = P * self.Nm

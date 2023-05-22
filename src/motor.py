@@ -17,7 +17,7 @@ class Motor:
     def VandI(self, M, N):
         Im = M * self.Kv0 * self.Um0 / 9.55 / (self.Um0 - self.Im0 * self.Rm)
         Um = (
-            self.Im * self.Rm
+            Im * self.Rm
             + (self.Um0 - self.Im0 * self.Rm) / (self.Kv0 * self.Um0) * N
         )
         return Im, Um
