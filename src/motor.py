@@ -2,6 +2,7 @@ from propeller import Propeller
 
 
 class Motor:
+
     def __init__(self, Kv0, Um0, Im0, Rm, Immax, mass, Propeller):
         # Motor characteristics
         self.Kv0 = Kv0  # KV value of the motor
