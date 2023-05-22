@@ -26,16 +26,7 @@ class Propeller:
         self.Ct, self.Cd, self.Cm = self.coefficients()
 
     def coefficients(self):
-        Ct = (
-            0.25
-            * np.pi**3
-            * labda
-            * zeta**2
-            * self.Bp
-            * K0
-            * (epsilon * np.arctan2(self.Hp, np.pi * self.Dp) - alpha0)
-            / (np.pi * A + K0)
-        )
+        Ct = 0.25 * np.pi**3 * labda * zeta**2 * self.Bp * K0 * (epsilon * np.arctan2(self.Hp, np.pi * self.Dp) - alpha0) / (np.pi * A + K0)
         Cd = (
             Cfd
             + np.pi
