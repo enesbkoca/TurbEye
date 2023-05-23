@@ -1,11 +1,11 @@
 import json
 from prettytable import PrettyTable
-from drone import Drone
-from motor import Motor
-from propeller import Propeller
+from src.drone import Drone
+from src.motor import Motor
+from src.propeller import Propeller
 
 
-class Combinations:
+class DroneCombinator:
     def __init__(self):
         self.drones = []
         self.motors = None

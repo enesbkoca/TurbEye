@@ -1,4 +1,4 @@
-{
+configuration = {
   "T": 3,
   "Nm": 8,
   "TW_R": 2,

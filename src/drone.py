@@ -1,8 +1,8 @@
-from propeller import Propeller
-from motor import Motor
-from hydrogen import Hydrogen
-import json
 from typing import Optional
+from src.propeller import Propeller
+from src.motor import Motor
+from src.hydrogen import Hydrogen
+from src.configuration import configuration
 
 # Mass budget inputs
 m_p = 0.64  # Mass of the payload
@@ -26,8 +26,7 @@ class Drone:
         motor: Optional[Motor] = None,
     ) -> None:
         if not config:
-            with open("config.json", "r") as file:
-                config = json.load(file)
+            config = configuration.copy()
 
         # General characteristics
         self.T = config["T"]  # hrs of flight time
