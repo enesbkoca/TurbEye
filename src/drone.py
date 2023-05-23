@@ -17,6 +17,14 @@ m_ch = 0.5  # Mass of the chassis
 m_fc = 3  # Mass of the hydrogen fuel cell
 m_pr = 0.305  # Mass of the pressure regulator
 
+P_cam = 10
+P_ch = 5
+P_3d = 15
+P_pos = 1
+P_data = 20
+P_rad = 1
+P_elec = 5
+
 
 class Drone:
     def __init__(
@@ -62,15 +70,16 @@ class Drone:
         )
         diff = 10000
         i = 0
-        while diff > 0.001:
+        while diff > 0.001 and i == 0:
             T_req = m_tot * 9.80665
             T_req_m = T_req / self.Nm * 2 / 1.8
             self.N = self.propeller.required_rpm(T_req_m)
             M = self.propeller.forces(self.N)[1]
             IV = self.motor.VandI(M, self.N)
             P = IV[0] * IV[1]
-            P_tot = P * self.Nm
-            E_tot = P_tot * self.T * 1.2
+            P_pay = P_cam + P_ch + P_3d + P_pos + P_data + P_rad + P_elec
+            P_tot = P * self.Nm * 1.2 + P_pay
+            E_tot = P_tot * self.T
             hyd = Hydrogen(E_tot)
             m_hyd = hyd.tot_mass()
             m_new = (
@@ -95,6 +104,7 @@ class Drone:
         if IV[0] > self.motor.Immax:
             # print("Current greater than Immax", f"{self.propeller} |  {self.motor}")
             return None
+
 
         return m_tot
 

@@ -33,7 +33,7 @@ class TestDrone(unittest.TestCase):
         self.assertTrue(self.D.Nm == 4)
 
     def test_mass(self):
-        self.assertTrue(self.D.mass == 1, msg=self.D.mass)
+        self.assertTrue(self.D.mass == 9.1, msg=self.D.mass)
 
 
 if __name__ == '__main__':
