@@ -1,6 +1,6 @@
-from propeller import Propeller
-from motor import Motor
-from hydrogen import Hydrogen
+from src.propeller import Propeller
+from src.motor import Motor
+from src.hydrogen import Hydrogen
 import json
 from typing import Optional
 

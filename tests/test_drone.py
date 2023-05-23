@@ -1,6 +1,7 @@
 import unittest
 from src.drone import Drone
 
+
 class TestDrone(unittest.TestCase):
 
     def setUp(self) -> None:
@@ -37,6 +38,4 @@ class TestDrone(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-
 
