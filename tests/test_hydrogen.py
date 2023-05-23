@@ -13,3 +13,8 @@ class HydTest(unittest.TestCase):
     def test_mass(self):
         self.assertTrue(self.H.tank_mass() == 41.187+8.38+1.0587)
         self.assertTrue(self.H.tot_mass() == 41.187+8.38+1.0587+1)
+
+
+if __name__ == '__main__':
+    unittest.main()
+

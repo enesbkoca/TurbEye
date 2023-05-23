@@ -31,3 +31,6 @@ class PropTest(unittest.TestCase):
         self.assertTrue(np.isclose(N, (1/0.04399/1.225/(0.5**4))**0.5*60, rtol=0.01, atol=0.001), msg=N)
 
 
+if __name__ == '__main__':
+    unittest.main()
+
