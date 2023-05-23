@@ -20,11 +20,15 @@ m_pr = 0.305  # Mass of the pressure regulator
 
 
 class Drone:
-
-    def __init__(self, config: Optional[dict] = None) -> None:
+    def __init__(
+        self,
+        config: Optional[dict] = None,
+        propeller: Optional[Propeller] = None,
+        motor: Optional[Motor] = None,
+    ) -> None:
 
         if not config:
-            with open('config.json', 'r') as file:
+            with open("config.json", "r") as file:
                 config = json.load(file)
 
         # General characteristics
@@ -32,38 +36,32 @@ class Drone:
         self.Nm = config["Nm"]  # Number of motors
         self.TW_R = config["TW_R"]  # Thrust to Weight Ratio
 
-        self.propeller = Propeller(config["Dp"],
-                                   config["Hp"],
-                                   config["Bp"],
-                                   config["m_prop"]
-                                   )
+        if propeller:
+            self.propeller = propeller
+        else:
+            self.propeller = Propeller(
+                config["Dp"], config["Hp"], config["Bp"], config["m_prop"]
+            )
 
-
-        self.motor = Motor(config["Kv0"],
-                           config["Um0"],
-                           config["Im0"],
-                           config["Rm"],
-                           config["Immax"],
-                           config["m_motor"]
-                           )
+        if motor:
+            self.motor = motor
+        else:
+            self.motor = Motor(
+                config["Kv0"],
+                config["Um0"],
+                config["Im0"],
+                config["Rm"],
+                config["Immax"],
+                config["m_motor"],
+            )
 
         self.mass = self.compute_weight()
 
     def compute_weight(self, max_iter=1000) -> Optional[float]:
-
         m_prop = self.propeller.mass * self.Nm  # Mass of the propellers
         m_motor = self.motor.mass * self.Nm  # Mass of the motors
         m_tot = (
-            m_p
-            + m_prop
-            + m_motor
-            + m_3d
-            + m_pos
-            + m_data
-            + m_elec
-            + m_fc
-            + m_pr
-            + m_ch
+            m_p + m_prop + m_motor + m_3d + m_pos + m_data + m_elec + m_fc + m_pr + m_ch
         )
         diff = 10000
         i = 0
@@ -79,25 +77,29 @@ class Drone:
             hyd = Hydrogen(E_tot)
             m_hyd = hyd.tot_mass()
             m_new = (
-                    m_p
-                    + m_prop
-                    + m_motor
-                    + m_3d
-                    + m_pos
-                    + m_data
-                    + m_elec
-                    + m_fc
-                    + m_pr
-                    + m_hyd
-                    + m_ch
+                m_p
+                + m_prop
+                + m_motor
+                + m_3d
+                + m_pos
+                + m_data
+                + m_elec
+                + m_fc
+                + m_pr
+                + m_hyd
+                + m_ch
             )
-            diff = abs(m_new-m_tot)
+            diff = abs(m_new - m_tot)
             m_tot = m_new
             i += 1
             if i == max_iter:
                 return None
 
         if IV[0] > self.motor.Immax:
-            print('Current greater than Immax')
+            # print("Current greater than Immax", f"{self.propeller} |  {self.motor}")
+            return None
 
         return m_tot
+
+    def __repr__(self):
+        return f"{self.propeller} |  {self.motor} | {self.mass:.2f} kg | {self.N:.2f} rpm"

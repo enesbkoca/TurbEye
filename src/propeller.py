@@ -14,7 +14,6 @@ K0 = 6.11
 
 
 class Propeller:
-
     def __init__(self, Dp, Hp, Bp, mass):
         # Propeller characteristics
         self.Dp = Dp  # Propeller diameter
@@ -22,6 +21,8 @@ class Propeller:
         self.Bp = Bp  # Number of blades in propeller
 
         self.mass = mass
+
+        self.name = None
 
         self.Ct, self.Cd, self.Cm = self.coefficients()
 
@@ -56,4 +57,5 @@ class Propeller:
     def required_rpm(self, T):
         return 60 * np.sqrt(T / self.Ct / rho / self.Dp**4)
 
-
+    def __repr__(self):
+        return self.name
