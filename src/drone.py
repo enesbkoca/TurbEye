@@ -103,7 +103,6 @@ class Drone:
                 return None
 
         if IV[0] > self.motor.Immax:
-            # print("Current greater than Immax", f"{self.propeller} |  {self.motor}")
             return None
 
 

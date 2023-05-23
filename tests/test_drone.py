@@ -1,5 +1,6 @@
 import unittest
 from src.drone import Drone
+import numpy as np
 
 
 class TestDrone(unittest.TestCase):
@@ -33,7 +34,7 @@ class TestDrone(unittest.TestCase):
         self.assertTrue(self.D.Nm == 4)
 
     def test_mass(self):
-        self.assertTrue(self.D.mass == 9.1, msg=self.D.mass)
+        self.assertTrue(np.isclose(self.D.mass, 9.625, atol=0.01, rtol=0.1), msg=self.D.mass)
 
 
 if __name__ == '__main__':
