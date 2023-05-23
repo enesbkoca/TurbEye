@@ -13,6 +13,7 @@ class Combinations:
 
         self.read_motor_prop()
         self.create_drones()
+        self.sort_drones()
 
     def read_motor_prop(self):
         with open("../datasets/motor.json", "r") as file:
@@ -24,7 +25,6 @@ class Combinations:
     def create_drones(self):
         for motor_name, motor_properties in self.motors.items():
             for prop_name, prop_properties in self.propellers.items():
-
                 motor = Motor(*motor_properties)
                 motor.name = motor_name
 
@@ -33,20 +33,28 @@ class Combinations:
 
                 drone = Drone(propeller=propeller, motor=motor)
 
-                if drone.mass and drone.mass < 12:
+                if drone.mass:
                     self.drones.append(drone)
 
-    def sort_drones(self, count: int = 5):
-
+    def sort_drones(self):
         self.drones.sort(key=lambda drone: drone.mass)
 
-        return self.drones[:count]
+        return self.drones
 
-    def table_drones(self):
-
+    def table_drones(self, count: int = 5, upper_limit: float = 12):
         table = PrettyTable(("Propeller", "Motor", "Mass", "RPM"))
 
-        for drone in self.drones:
-            table.add_row((drone.propeller, drone.motor, f"{drone.mass:.2f} kg", f"{drone.N:.2f} rpm"))
+        for drone in self.drones[:count]:
+            if drone.mass > upper_limit:
+                break
+
+            table.add_row(
+                (
+                    drone.propeller,
+                    drone.motor,
+                    f"{drone.mass:.2f} kg",
+                    f"{drone.N:.2f} rpm",
+                )
+            )
 
         return table

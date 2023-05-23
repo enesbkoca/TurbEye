@@ -26,7 +26,6 @@ class Drone:
         propeller: Optional[Propeller] = None,
         motor: Optional[Motor] = None,
     ) -> None:
-
         if not config:
             with open("config.json", "r") as file:
                 config = json.load(file)
@@ -102,4 +101,6 @@ class Drone:
         return m_tot
 
     def __repr__(self):
-        return f"{self.propeller} |  {self.motor} | {self.mass:.2f} kg | {self.N:.2f} rpm"
+        return (
+            f"{self.propeller} |  {self.motor} | {self.mass:.2f} kg | {self.N:.2f} rpm"
+        )
