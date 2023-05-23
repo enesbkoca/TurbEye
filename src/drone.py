@@ -67,13 +67,13 @@ class Drone:
         i = 0
         while diff > 0.001:
             T_req = m_tot * 9.80665
-            T_req_m = T_req / self.Nm
+            T_req_m = T_req / self.Nm * 2 / 1.8
             self.N = self.propeller.required_rpm(T_req_m)
             M = self.propeller.forces(self.N)[1]
             IV = self.motor.VandI(M, self.N)
             P = IV[0] * IV[1]
             P_tot = P * self.Nm
-            E_tot = P_tot * self.T
+            E_tot = P_tot * self.T * 1.2
             hyd = Hydrogen(E_tot)
             m_hyd = hyd.tot_mass()
             m_new = (
