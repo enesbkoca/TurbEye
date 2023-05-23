@@ -38,6 +38,7 @@ class Drone:
                                    config["m_prop"]
                                    )
 
+
         self.motor = Motor(config["Kv0"],
                            config["Um0"],
                            config["Im0"],
