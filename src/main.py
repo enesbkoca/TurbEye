@@ -10,5 +10,4 @@ if __name__ == "__main__":
 
     drone_list = combinations.sort_drones(1000)
 
-    for drone in drone_list:
-        print(drone)
+    print(combinations.table_drones())

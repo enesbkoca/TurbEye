@@ -1,4 +1,5 @@
 import json
+from prettytable import PrettyTable
 from drone import Drone
 from motor import Motor
 from propeller import Propeller
@@ -40,3 +41,12 @@ class Combinations:
         self.drones.sort(key=lambda drone: drone.mass)
 
         return self.drones[:count]
+
+    def table_drones(self):
+
+        table = PrettyTable(("Propeller", "Motor", "Mass", "RPM"))
+
+        for drone in self.drones:
+            table.add_row((drone.propeller, drone.motor, f"{drone.mass:.2f} kg", f"{drone.N:.2f} rpm"))
+
+        return table
