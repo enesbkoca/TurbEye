@@ -1,4 +1,3 @@
-import numpy as np
 from propeller import Propeller
 from motor import Motor
 from hydrogen import Hydrogen
@@ -56,7 +55,7 @@ class Drone:
 
         self.mass = self.compute_weight()
 
-    def compute_weight(self, max_iter=1000) -> Optional[float]:
+    def compute_weight(self, max_iter: int = 1000) -> Optional[float]:
         m_prop = self.propeller.mass * self.Nm  # Mass of the propellers
         m_motor = self.motor.mass * self.Nm  # Mass of the motors
         m_tot = (
