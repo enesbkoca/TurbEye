@@ -11,7 +11,7 @@ class Motor:
         self.name = None
 
     def VandI(self, M, N):
-        Im = M * self.Kv0 * self.Um0 / 9.55 / (self.Um0 - self.Im0 * self.Rm)
+        Im = M * self.Kv0 * self.Um0 / 9.55 / (self.Um0 - self.Im0 * self.Rm) + self.Im0
         Um = Im * self.Rm + (self.Um0 - self.Im0 * self.Rm) / (self.Kv0 * self.Um0) * N
         return Im, Um
 

@@ -21,7 +21,9 @@ class MotorTest(unittest.TestCase):
         self.assertTrue(self.motor.name == self.motor.__repr__())
 
     def test_VandI(self):
-
-        self.assertTrue(np.allclose(self.motor.VandI(0.2378, 2500),
-                                   (3.2075, 25.467), rtol=0.01, atol=0.001),
-                                    msg=self.motor.VandI(0.2378, 2500))
+        self.assertTrue(
+            np.allclose(
+                self.motor.VandI(0.2378, 2500), (3.2075, 25.467), rtol=0.01, atol=0.001
+            ),
+            msg=self.motor.VandI(0.2378, 2500),
+        )
