@@ -1,5 +1,6 @@
 import unittest
 from src.propeller import Propeller
+import numpy as np
 
 
 class PropTest(unittest.TestCase):
@@ -15,6 +16,6 @@ class PropTest(unittest.TestCase):
         self.assertTrue(self.P.mass == 0.1)
 
     def test_coefficients(self):
-        self.assertTrue(self.P.Ct == 0.04399)
+        self.assertTrue(np.isclose(self.P.Ct == 0.04399))
         self.assertTrue(self.P.Cm == 0.003578)
         self.assertTrue(self.P.Cd == 0.019334)
