@@ -2,3 +2,4 @@ numpy
 black
 prettytable
 pandas
+matplotlib
