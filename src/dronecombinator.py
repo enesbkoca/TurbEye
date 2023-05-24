@@ -41,7 +41,7 @@ class DroneCombinator:
 
         return self.drones
 
-    def table_drones(self, count: int = 5, upper_limit: float = 12):
+    def print_drones(self, count: int = 5, upper_limit: float = 12):
         table = PrettyTable(("Propeller", "Motor", "Mass", "RPM"))
 
         for drone in self.drones[:count]:
@@ -57,4 +57,4 @@ class DroneCombinator:
                 )
             )
 
-        return table
+        print(table)
