@@ -3,7 +3,7 @@ from prettytable import PrettyTable
 from src.drone import Drone
 from src.motor import Motor
 from src.propeller import Propeller
-
+from typing import List
 
 class DroneCombinator:
     def __init__(self):
@@ -42,14 +42,15 @@ class DroneCombinator:
         return self.drones
 
     def print_drones(self, count: int = 5, upper_limit: float = 12):
-        table = PrettyTable(("Propeller", "Motor", "Mass", "RPM"))
+        table = PrettyTable(("i", "Propeller", "Motor", "Mass", "RPM"))
 
-        for drone in self.drones[:count]:
+        for idx, drone in enumerate(self.drones[:count]):
             if drone.mass > upper_limit:
                 break
 
             table.add_row(
                 (
+                    idx,
                     drone.propeller,
                     drone.motor,
                     f"{drone.mass:.2f} kg",
@@ -58,3 +59,6 @@ class DroneCombinator:
             )
 
         print(table)
+
+    def __getitem__(self, item):
+        return self.drones[item]
