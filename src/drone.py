@@ -9,6 +9,8 @@ from src.configuration import configuration
 
 import matplotlib.pyplot as plt
 
+g = 9.80665
+
 # Mass budget inputs
 m_p = 0.64  # Mass of the payload
 m_3d = 1.2  # Mass of the 3D modelling system
@@ -87,7 +89,7 @@ class Drone:
         diff = 10000
         i = 0
         while diff > 0.001:
-            T_req = m_tot * 9.80665
+            T_req = m_tot * g
             T_req_m = T_req / self.Nm / co_eff
             self.N = self.propeller.required_rpm(T_req_m)
             M = self.propeller.forces(self.N)[1]
@@ -124,7 +126,7 @@ class Drone:
         return m_tot
 
     def check_for_max(self, m_tot, co_eff):
-        T_req = m_tot * 9.80665 * self.TW_R
+        T_req = m_tot * g * self.TW_R
         T_req_m = T_req / self.Nm / co_eff
         N = self.propeller.required_rpm(T_req_m)
         M = self.propeller.forces(N)[1]
@@ -134,7 +136,7 @@ class Drone:
 
     def compute_endurance(self, av_t, co_eff=0.9, tw_f=1.2):
         E = self.hyd.mh2 * self.hyd.U
-        T_req_m = self.mass * 9.80665 / self.Nm / co_eff * av_t
+        T_req_m = self.mass * g / self.Nm / co_eff * av_t
         N = self.propeller.required_rpm(T_req_m)
         M = self.propeller.forces(N)[1]
         IV = self.motor.VandI(M, N)
@@ -153,41 +155,70 @@ class Drone:
         plt.ylabel('Endurance [h]')
         plt.show()
 
+    @staticmethod
+    def plot(ax, x, y, xlabel, ylabel, xrange, yrange, title=None, verts=None, vertlabels=None):
+        ax.set_xticks(np.arange(*xrange[0:2]))
+        ax.set_xticks(np.arange(xrange[0], xrange[1], xrange[3]), minor=True)
+        ax.set_yticks(np.arange(yrange[0], yrange[1], yrange[2]))
+        ax.set_yticks(np.arange(yrange[0], yrange[1], yrange[3]), minor=True)
+        ax.grid(which='minor', alpha=0.2)
+        ax.grid(which='major', alpha=0.5)
+
+        if title:
+            plt.title(title)
+
+        if verts:
+            for i, vert in enumerate(verts):
+                if vertlabels:
+                    plt.plot([vert, vert], [min(y), max(y)], label=vertlabels[i])
+                    ax.legend()
+                else:
+                    plt.plot([vert, vert], [min(y), max(y)])
+
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.plot(x, y)
+
     def plot_PT(self):
         T_arr = []
         P_arr = []
         eta_arr = []
         N_arr = range(0, 5000, 10)
+        found = False
         for N in N_arr:
             T, M = self.propeller.forces(N)
             IV = self.motor.VandI(M, N)
             P = IV[0] * IV[1]
+            if self.motor.Immax < IV[0] and found is False:
+                T3 = T
+                N3 = N
+                found = True
             T_arr.append(T)
             P_arr.append(P)
             eta_arr.append(M*N*2*np.pi/60/P)
-        plt.subplot(2, 2, 1)
-        # plt.title('Power/Thrust Curve')
-        plt.xlabel('Thrust [N]')
-        plt.ylabel('Power [W]')
-        plt.plot(T_arr, P_arr)
 
-        plt.subplot(2, 2, 2)
-        # plt.title('Power/RPM Curve')
-        plt.xlabel('RPM [-]')
-        plt.ylabel('Power [W]')
-        plt.plot(N_arr, P_arr)
+        T1 = self.mass*g/self.Nm
+        T2 = self.mass*2*g/self.Nm
+        N1 = self.propeller.required_rpm(T1)
+        N2 = self.propeller.required_rpm(T2)
 
-        plt.subplot(2, 2, 3)
-        # plt.title('Thrust/RPM Curve')
-        plt.xlabel('RPM [-]')
-        plt.ylabel('Thrust [N]')
-        plt.plot(N_arr, T_arr)
+        fig = plt.figure(figsize=[10, 6])
+        fig.suptitle('Performance plots for each engine', fontsize=20)
+        ax1 = fig.add_subplot(2, 2, 1)
+        Drone.plot(ax1, T_arr, P_arr, 'Thrust [N]', 'Power [W]', [0, 101, 20, 4], [0, 3001, 500, 100],
+                  verts=[T1, T2 ,T3], vertlabels=['Hover', 'Max Thrust', 'Max Current'])
 
-        plt.subplot(2, 2, 4)
-        # plt.title('Efficiency/RPM Curve')
-        plt.xlabel('RPM [-]')
-        plt.ylabel('Efficiency [-]')
-        plt.plot(N_arr, eta_arr)
+        ax2 = fig.add_subplot(2, 2, 2)
+        Drone.plot(ax2, N_arr, P_arr, 'RPM [-]', 'Power [W]', [0, 5001, 1000, 200], [0, 3001, 500, 100],
+                  verts=[N1, N2, N3])
+
+        ax3 = fig.add_subplot(2, 2, 3)
+        Drone.plot(ax3, N_arr, T_arr, 'RPM [-]', 'Thrust [N]', [0, 5001, 1000, 200], [0, 101, 20, 4],
+                  verts=[N1, N2, N3])
+
+        ax4 = fig.add_subplot(2, 2, 4)
+        Drone.plot(ax4, N_arr, eta_arr, 'RPM [-]', 'Efficiency [-]', [0, 5001, 1000, 200], [0, 1.001, 0.2, 0.04],
+                  verts=[N1, N2, N3])
 
         plt.tight_layout()
         plt.show()
