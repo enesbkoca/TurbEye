@@ -22,7 +22,7 @@ class Propeller:
 
         self.mass = mass
 
-        self.name = None
+        self.name = "Custom Propeller"
 
         self.Ct, self.Cd, self.Cm = self.coefficients()
 
@@ -59,3 +59,6 @@ class Propeller:
 
     def __repr__(self):
         return self.name
+
+    def __str__(self):
+        return self.__repr__()

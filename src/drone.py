@@ -45,8 +45,6 @@ class Drone:
         if not config:
             config = configuration.copy()
 
-        self._config = config
-
         # General characteristics
         self.T = config["T"]  # hrs of flight time
         self.Nm = config["Nm"]  # Number of motors
@@ -54,6 +52,10 @@ class Drone:
 
         if propeller:
             self.propeller = propeller
+            config["Dp"] = propeller.Dp
+            config["Hp"] = propeller.Hp
+            config["Bp"] = propeller.Bp
+            config["m_prop"] = propeller.mass
         else:
             self.propeller = Propeller(
                 config["Dp"], config["Hp"], config["Bp"], config["m_prop"]
@@ -61,6 +63,12 @@ class Drone:
 
         if motor:
             self.motor = motor
+            config["Kv0"] = motor.Kv0
+            config["Um0"] = motor.Um0
+            config["Im0"] = motor.Im0
+            config["Rm"] = motor.Rm
+            config["Immax"] = motor.Immax
+            config["m_motor"] = motor.mass
         else:
             self.motor = Motor(
                 config["Kv0"],
@@ -71,6 +79,7 @@ class Drone:
                 config["m_motor"],
             )
 
+        self._config = config
         self.mass = self.compute_weight()
 
     def compute_weight(
@@ -261,9 +270,10 @@ class Drone:
         plt.show()
 
     def __repr__(self):
-        return (
-            f"{self.propeller} |  {self.motor} | {self.mass:.2f} kg | {self.N:.2f} rpm"
-        )
+        return f"{self.propeller} |  {self.motor} | {self.mass:.2f} kg | {self.N:.2f} rpm"
+
+    def __str__(self):
+        return self.__repr__()
 
     @property
     def config(self):
@@ -272,4 +282,4 @@ class Drone:
 
 if __name__ == "__main__":
     drone = Drone()
-    print(drone.mass)
+    print(drone)

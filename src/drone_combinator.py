@@ -64,3 +64,9 @@ class DroneCombinator:
 
     def __getitem__(self, item):
         return self.drones[item]
+
+
+if __name__ == "__main__":
+    combinations = DroneCombinator()
+    combinations.print_drones(count=20, upper_limit=15)
+

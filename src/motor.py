@@ -8,7 +8,7 @@ class Motor:
         self.Immax = Immax  # Motor max current
         self.mass = mass
 
-        self.name = None
+        self.name = "Custom Motor"
 
     def VandI(self, M, N):
         Im = M * self.Kv0 * self.Um0 / 9.55 / (self.Um0 - self.Im0 * self.Rm) + self.Im0
@@ -17,3 +17,6 @@ class Motor:
 
     def __repr__(self):
         return self.name
+
+    def __str__(self):
+        return self.__repr__()
