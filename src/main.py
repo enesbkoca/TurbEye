@@ -1,4 +1,4 @@
-from dronecombinator import DroneCombinator
+from drone_combinator import DroneCombinator
 from drone import Drone
 
 if __name__ == "__main__":

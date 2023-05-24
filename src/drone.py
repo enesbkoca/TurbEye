@@ -34,6 +34,7 @@ P_elec = 5
 
 P_pay = P_cam + P_ch + P_3d + P_pos + P_data + P_rad + P_elec
 
+
 class Drone:
     def __init__(
         self,
@@ -43,6 +44,8 @@ class Drone:
     ) -> None:
         if not config:
             config = configuration.copy()
+
+        self._config = config
 
         # General characteristics
         self.T = config["T"]  # hrs of flight time
@@ -156,13 +159,11 @@ class Drone:
         plt.show()
 
     @staticmethod
-    def plot(ax, x, y, xlabel, ylabel, xrange, yrange, title=None, verts=None, vertlabels=None):
-        ax.set_xticks(np.arange(*xrange[0:2]))
-        ax.set_xticks(np.arange(xrange[0], xrange[1], xrange[3]), minor=True)
-        ax.set_yticks(np.arange(yrange[0], yrange[1], yrange[2]))
-        ax.set_yticks(np.arange(yrange[0], yrange[1], yrange[3]), minor=True)
-        ax.grid(which='minor', alpha=0.2)
-        ax.grid(which='major', alpha=0.5)
+    def plot(ax, x, y, xlabel, ylabel, label=None, title=None, verts=None, vertlabels=None):
+
+        plt.grid(which='minor', linewidth=0.2)
+        plt.grid(which='major', linewidth=1)
+        plt.minorticks_on()
 
         if title:
             plt.title(title)
@@ -177,7 +178,7 @@ class Drone:
 
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
-        plt.plot(x, y)
+        plt.plot(x, y, alpha=1.0, label=label)
 
     def plot_PT(self):
         T_arr = []
@@ -223,9 +224,16 @@ class Drone:
         plt.tight_layout()
         plt.show()
 
-
-
     def __repr__(self):
         return (
             f"{self.propeller} |  {self.motor} | {self.mass:.2f} kg | {self.N:.2f} rpm"
         )
+
+    @property
+    def config(self):
+        return self._config.copy()
+
+
+if __name__ == "__main__":
+    drone = Drone()
+    print(drone.mass)

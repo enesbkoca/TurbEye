@@ -1,6 +1,6 @@
 import unittest
 from math import inf
-from src.dronecombinator import DroneCombinator
+from src.drone_combinator import DroneCombinator
 
 
 class TestCombinator(unittest.TestCase):
