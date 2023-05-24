@@ -66,7 +66,17 @@ class Drone:
         m_prop = self.propeller.mass * self.Nm  # Mass of the propellers
         m_motor = self.motor.mass * self.Nm  # Mass of the motors
         m_tot = (
-            m_p + m_prop + m_motor + m_3d + m_pos + m_data + m_elec + m_fc + m_pr + m_ch + m_rad
+            m_p
+            + m_prop
+            + m_motor
+            + m_3d
+            + m_pos
+            + m_data
+            + m_elec
+            + m_fc
+            + m_pr
+            + m_ch
+            + m_rad
         )
         diff = 10000
         i = 0
@@ -104,7 +114,6 @@ class Drone:
 
         if IV[0] > self.motor.Immax:
             return None
-
 
         return m_tot
 

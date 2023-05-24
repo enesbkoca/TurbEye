@@ -4,7 +4,6 @@ from src.dronecombinator import DroneCombinator
 
 
 class TestCombinator(unittest.TestCase):
-
     def setUp(self) -> None:
         self.combinator = DroneCombinator()
 
@@ -14,7 +13,6 @@ class TestCombinator(unittest.TestCase):
         self.assertTrue(self.combinator.propellers is not None)
 
     def test_create_drones(self):
-
         n_combinations = len(self.combinator.motors) * len(self.combinator.propellers)
 
         self.assertTrue(len(self.combinator.drones) <= n_combinations)

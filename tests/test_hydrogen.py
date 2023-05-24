@@ -3,7 +3,6 @@ from src.hydrogen import Hydrogen
 
 
 class HydTest(unittest.TestCase):
-
     def setUp(self) -> None:
         self.H = Hydrogen(34000)
 
@@ -16,6 +15,5 @@ class HydTest(unittest.TestCase):
         self.assertTrue(self.H.tot_mass() == 41.187 + 8.38 + 1.0587 + 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
-
