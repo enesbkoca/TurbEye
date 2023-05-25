@@ -100,8 +100,8 @@ class Drone:
             M = self.propeller.forces(self.N)[1]
             IV = self.motor.VandI(M, self.N)
             P = IV[0] * IV[1]
-            P_tot = P * self.Nm * tw_f + P_pay
-            E_tot = P_tot * self.T
+            self.P_tot = P * self.Nm * tw_f + P_pay
+            E_tot = self.P_tot * self.T
             self.hyd = Hydrogen(E_tot)
             m_hyd = self.hyd.tot_mass()
             m_new = (
@@ -208,6 +208,7 @@ class Drone:
 
         fig = plt.figure(figsize=[10, 6])
         fig.suptitle("Performance plots for each engine", fontsize=20)
+
         ax1 = fig.add_subplot(2, 2, 1)
         Drone.plot(
             ax1,
@@ -215,8 +216,6 @@ class Drone:
             P_arr,
             "Thrust [N]",
             "Power [W]",
-            [0, 101, 20, 4],
-            [0, 3001, 500, 100],
             verts=[T1, T2, T3],
             vertlabels=["Hover", "Max Thrust", "Max Current"],
         )
@@ -228,8 +227,6 @@ class Drone:
             P_arr,
             "RPM [-]",
             "Power [W]",
-            [0, 5001, 1000, 200],
-            [0, 3001, 500, 100],
             verts=[N1, N2, N3],
         )
 
@@ -240,8 +237,6 @@ class Drone:
             T_arr,
             "RPM [-]",
             "Thrust [N]",
-            [0, 5001, 1000, 200],
-            [0, 101, 20, 4],
             verts=[N1, N2, N3],
         )
 
@@ -252,8 +247,6 @@ class Drone:
             eta_arr,
             "RPM [-]",
             "Efficiency [-]",
-            [0, 5001, 1000, 200],
-            [0, 1.001, 0.2, 0.04],
             verts=[N1, N2, N3],
         )
 
