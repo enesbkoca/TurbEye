@@ -1,15 +1,15 @@
 import json
 from prettytable import PrettyTable
 from src.drone import Drone
-from src.motor import Motor
-from src.propeller import Propeller
+from src.shelf_drone import ShelfPropeller, ShelfMotor
 
 
 class DroneCombinator:
+    motors = None
+    propellers = None
+
     def __init__(self):
         self.drones = []
-        self.motors = None
-        self.propellers = None
 
         self.read_motor_prop()
         self.create_drones()
@@ -23,13 +23,11 @@ class DroneCombinator:
             self.propellers = json.load(file)
 
     def create_drones(self):
-        for motor_name, motor_properties in self.motors.items():
-            for prop_name, prop_properties in self.propellers.items():
-                motor = Motor(*motor_properties)
-                motor.name = motor_name
+        for motor_name in self.motors:
+            for prop_name in self.propellers:
 
-                propeller = Propeller(*prop_properties)
-                propeller.name = prop_name
+                motor = ShelfMotor(motor_name)
+                propeller = ShelfPropeller(prop_name)
 
                 drone = Drone(propeller=propeller, motor=motor)
 
@@ -67,4 +65,4 @@ class DroneCombinator:
 
 if __name__ == "__main__":
     combinations = DroneCombinator()
-    combinations.print_drones(count=20, upper_limit=205)
+    combinations.print_drones(count=20, upper_limit=15)
