@@ -171,7 +171,7 @@ class Drone:
 
     @staticmethod
     def plot(
-        ax, x, y, xlabel, ylabel, label=None, title=None, verts=None, vertlabels=None
+        ax, x, y, xlabel, ylabel, xlim=None, label=None, title=None, verts=None, vertlabels=None
     ):
         plt.grid(which="minor", linewidth=0.2)
         plt.grid(which="major", linewidth=1)
@@ -187,6 +187,9 @@ class Drone:
                     ax.legend()
                 else:
                     plt.plot([vert, vert], [min(y), max(y)])
+
+        if xlim:
+            plt.xlim(*xlim)
 
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
@@ -227,6 +230,7 @@ class Drone:
             "Power [W]",
             verts=[T1, T2, T3],
             vertlabels=["Hover", "Max Thrust", "Max Current"],
+            xlim=[0, T3*1.2]
         )
 
         ax2 = fig.add_subplot(2, 2, 2)
@@ -237,6 +241,7 @@ class Drone:
             "RPM [-]",
             "Power [W]",
             verts=[N1, N2, N3],
+            xlim=[0, N3*1.2]
         )
 
         ax3 = fig.add_subplot(2, 2, 3)
@@ -247,6 +252,7 @@ class Drone:
             "RPM [-]",
             "Thrust [N]",
             verts=[N1, N2, N3],
+            xlim=[0, N3*1.2]
         )
 
         ax4 = fig.add_subplot(2, 2, 4)
@@ -257,6 +263,7 @@ class Drone:
             "RPM [-]",
             "Efficiency [-]",
             verts=[N1, N2, N3],
+            xlim=[0, N3*1.2]
         )
 
         plt.tight_layout()
