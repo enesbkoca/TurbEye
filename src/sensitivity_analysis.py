@@ -17,6 +17,8 @@ class SensitivityAnalysis:
 
         if "Bp" in self.parameters:
             self.parameters.remove("Bp")
+        if "Nm" in self.parameters:
+            self.parameters.remove("Nm")
 
         self.x_values = []
         self.mass_values = []
@@ -58,9 +60,9 @@ class SensitivityAnalysis:
 
 
 if __name__ == "__main__":
-    drone = Drone()
+    d = Drone()
 
-    sens = SensitivityAnalysis(drone)
+    sens = SensitivityAnalysis(d)
 
     sens.perform_analysis()
     sens.plot()
