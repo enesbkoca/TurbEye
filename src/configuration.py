@@ -1,5 +1,5 @@
 configuration = {
-    "T": 3,
+    "T": 1,
     "Nm": 8,
     "TW_R": 2,
     "Dp": 0.5588,
