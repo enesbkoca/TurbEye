@@ -156,6 +156,7 @@ class Drone:
         IV = self.motor.VandI(M, N)
         P = IV[0] * IV[1]
         P_tot = P * self.Nm * tw_f + P_pay
+
         return E / P_tot
 
     def plot_endurance_TW(self):
