@@ -8,7 +8,8 @@ if __name__ == "__main__":
     # drone.plot_PT()
 
     combinations = DroneCombinator()
-    for d in combinations.drones[:1]:
-        sens = SensitivityAnalysis(d)
-        sens.perform_analysis()
-        sens.plot()
+    combinations.print_drones()
+    # for d in combinations.drones[:1]:
+    #     sens = SensitivityAnalysis(d)
+    #     sens.perform_analysis()
+    #     sens.plot()
