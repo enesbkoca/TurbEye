@@ -172,7 +172,17 @@ class Drone:
 
     @staticmethod
     def plot(
-        ax, x, y, xlabel, ylabel, xlimit=None, label=None, title=None, verts=None, vertlabels=None
+        ax,
+        x,
+        y,
+        xlabel,
+        ylabel,
+        xlimit=None,
+        ylimit=None,
+        label=None,
+        title=None,
+        verts=None,
+        vertlabels=None,
     ):
         plt.grid(which="minor", linewidth=0.2)
         plt.grid(which="major", linewidth=1)
@@ -184,14 +194,22 @@ class Drone:
         if verts:
             for i, vert in enumerate(verts):
                 if vertlabels:
-                    plt.plot([vert, vert], [min(y), max(y)], label=vertlabels[i])
+                    plt.plot([vert, vert], [min(y)*0.9, max(y)*1.1], label=vertlabels[i])
                     ax.legend()
                 else:
-                    plt.plot([vert, vert], [min(y), max(y)])
+                    plt.plot([vert, vert], [min(y)*0.9, max(y)*1.1])
 
         if xlimit:
-            print(xlimit)
             plt.xlim(xlimit)
+        if ylimit:
+            plt.ylim(bottom=0)
+
+            x = np.array(x)
+            y = np.array(y)
+
+            y_ = y * ((xlimit[0] < x) & (x < xlimit[1]))
+
+            plt.ylim(top=max(y_)*1.1)
 
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
@@ -232,7 +250,8 @@ class Drone:
             "Power [W]",
             verts=[T1, T2, T3],
             vertlabels=["Hover", "Max Thrust", "Max Current"],
-            xlimit=[0, T3*1.2]
+            xlimit=[0, T3 * 1.1],
+            ylimit=[0, T3 * 1.1]
         )
 
         ax2 = fig.add_subplot(2, 2, 2)
@@ -243,7 +262,8 @@ class Drone:
             "RPM [-]",
             "Power [W]",
             verts=[N1, N2, N3],
-            xlimit=[0, N3*1.2]
+            xlimit=[0, N3 * 1.1],
+            ylimit=[0, T3 * 1.1]
         )
 
         ax3 = fig.add_subplot(2, 2, 3)
@@ -254,7 +274,8 @@ class Drone:
             "RPM [-]",
             "Thrust [N]",
             verts=[N1, N2, N3],
-            xlimit=[0, N3*1.2]
+            xlimit=[0, N3 * 1.1],
+            ylimit=[0, T3 * 1.1]
         )
 
         ax4 = fig.add_subplot(2, 2, 4)
@@ -265,14 +286,17 @@ class Drone:
             "RPM [-]",
             "Efficiency [-]",
             verts=[N1, N2, N3],
-            xlimit=[0, N3*1.2]
+            xlimit=[0, N3 * 1.1],
+            ylimit=[0, T3 * 1.1]
         )
 
         plt.tight_layout()
         plt.show()
 
     def __repr__(self):
-        return f"{self.propeller} |  {self.motor} | {self.mass:.2f} kg | {self.N:.2f} rpm"
+        return (
+            f"{self.propeller} |  {self.motor} | {self.mass:.2f} kg | {self.N:.2f} rpm"
+        )
 
     def __str__(self):
         return self.__repr__()
@@ -284,4 +308,3 @@ class Drone:
 
 if __name__ == "__main__":
     drone = Drone()
-    print(drone)

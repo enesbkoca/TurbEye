@@ -25,7 +25,6 @@ class DroneCombinator:
     def create_drones(self):
         for motor_name in self.motors:
             for prop_name in self.propellers:
-
                 motor = ShelfMotor(motor_name)
                 propeller = ShelfPropeller(prop_name)
 
