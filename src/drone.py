@@ -145,7 +145,7 @@ class Drone:
         N = self.propeller.required_rpm(T_req_m)
         M = self.propeller.forces(N)[1]
         IV = self.motor.VandI(M, N)
-        # print(IV[0], self.motor.Immax)
+
         return IV[0] / self.motor.Immax
 
     def compute_endurance(self, av_t, co_eff=0.9, tw_f=1.2):
