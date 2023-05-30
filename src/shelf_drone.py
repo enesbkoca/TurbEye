@@ -2,6 +2,8 @@ import json
 from src.propeller import Propeller
 from src.motor import Motor
 from src.drone import Drone
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 class ShelfPropeller(Propeller):
@@ -46,4 +48,7 @@ if __name__ == "__main__":
     drone = Drone(propeller=prop, motor=motor)
     print(drone.propeller)
     print(drone.motor)
+    drone.propeller.Cm = 0.00345
+    drone.propeller.Ct = 0.0735
     drone.plot_PT()
+
