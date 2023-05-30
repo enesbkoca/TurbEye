@@ -160,7 +160,7 @@ class Drone:
         return E / P_tot
 
     def plot_endurance_TW(self):
-        avt_arr = np.arange(1, 2, 0.05)
+        avt_arr = np.arange(1, 2.05, 0.05)
         end_arr = []
         for avt in avt_arr:
             end_arr.append(self.compute_endurance(avt))
