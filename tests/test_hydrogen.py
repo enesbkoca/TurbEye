@@ -1,10 +1,10 @@
 import unittest
-from src.hydrogen import Hydrogen
+from src.hydrogen import HydrogenTank
 
 
 class HydTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.H = Hydrogen(34000)
+        self.H = HydrogenTank(34000)
 
     def test_init(self):
         self.assertTrue(self.H.U == 34000)

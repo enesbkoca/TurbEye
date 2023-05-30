@@ -6,7 +6,8 @@ from sklearn.metrics import mean_squared_error
 
 from src.propeller import Propeller
 from src.motor import Motor
-from src.hydrogen import Hydrogen
+from src.hydrogen import HydrogenTank, FuelCell
+from src.esc import ESC
 from src.configuration import configuration
 
 import matplotlib.pyplot as plt
@@ -43,42 +44,37 @@ class Drone:
         config: Optional[dict] = None,
         propeller: Optional[Propeller] = None,
         motor: Optional[Motor] = None,
+        esc: Optional[ESC] = None,
+        fuelcell: Optional[FuelCell] = None,
     ) -> None:
         if not config:
             config = configuration.copy()
 
-        # General characteristics
-        self.T = config["T"]  # hrs of flight time
-        self.Nm = config["Nm"]  # Number of motors
-        self.TW_R = config["TW_R"]  # Thrust to Weight Ratio
+        # General characteristics: hrs of flight, number of motors, T/W ratio
+        self.T, self.Nm, self.TW_R = config["mission"].values()
 
         if propeller:
             self.propeller = propeller
-            config["Dp"] = propeller.Dp
-            config["Hp"] = propeller.Hp
-            config["Bp"] = propeller.Bp
-            config["m_prop"] = propeller.mass
+            config["propeller"] = propeller.dict
         else:
             self.propeller = Propeller(
-                config["Dp"], config["Hp"], config["Bp"], config["m_prop"]
+                *config["propeller"].values()
             )
 
         if motor:
             self.motor = motor
-            config["Kv0"] = motor.Kv0
-            config["Um0"] = motor.Um0
-            config["Im0"] = motor.Im0
-            config["Rm"] = motor.Rm
-            config["Immax"] = motor.Immax
-            config["m_motor"] = motor.mass
+            config["motor"] = motor.dict
         else:
             self.motor = Motor(
-                config["Kv0"],
-                config["Um0"],
-                config["Im0"],
-                config["Rm"],
-                config["Immax"],
-                config["m_motor"],
+                *config["motor"].values()
+            )
+
+        if esc:
+            self.esc = esc
+            config["esc"] = esc.dict
+        else:
+            self.esc = ESC(
+                *config["esc"].values()
             )
 
         self._config = config
@@ -113,7 +109,7 @@ class Drone:
             P = V * I
             self.P_tot = P * self.Nm * tw_f + P_pay
             E_tot = self.P_tot * self.T
-            self.hyd = Hydrogen(E_tot)
+            self.hyd = HydrogenTank(E_tot)
             m_hyd = self.hyd.tot_mass()
             m_new = (
                 m_p
@@ -136,8 +132,6 @@ class Drone:
                 return None
 
         self.I_ratio = self.check_for_max(m_tot, co_eff)
-        # if self.I_ratio > 1:
-        #     return None
 
         return m_tot
 
@@ -427,3 +421,4 @@ class Drone:
 
 if __name__ == "__main__":
     drone = Drone()
+    drone.plot_PT()
