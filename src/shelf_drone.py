@@ -18,6 +18,10 @@ class ShelfPropeller(Propeller):
         super().__init__(*self.propellers[prop_name])
         self.name = prop_name
 
+    def cor_coeff(self, Cm, Ct):
+        self.Cm = Cm
+        self.Ct = Ct
+
     @classmethod
     def read_prop(cls):
         with open("../datasets/propeller.json", "r") as file:
@@ -42,13 +46,13 @@ class ShelfMotor(Motor):
 
 
 if __name__ == "__main__":
-    prop = ShelfPropeller("T-Motor NS 26x85")
-    motor = ShelfMotor("T-Motor Antigravity MN6007II KV160")
+    prop = ShelfPropeller("T-Motor P18x61")
+    motor = ShelfMotor("T-Motor Antigravity MN5008 KV170")
 
     drone = Drone(propeller=prop, motor=motor)
     print(drone.propeller)
     print(drone.motor)
-    drone.propeller.Cm = 0.00345
-    drone.propeller.Ct = 0.0735
+    drone.propeller.Cm = 0.005
+    drone.propeller.Ct = 0.09
     drone.plot_PT()
 

@@ -222,6 +222,7 @@ class Drone:
         P_arr = []
         V_arr = []
         I_arr = []
+        M_arr = []
         eta_arr = []
         N_arr = range(0, 100000, 10)
         found = False
@@ -229,7 +230,6 @@ class Drone:
         for N in N_arr:
             T, M = self.propeller.forces(N)
             V, I = self.motor.VandI(M, N)
-
             P = I * V
             if self.motor.Immax < I and found is False:
                 T3 = T
@@ -239,6 +239,7 @@ class Drone:
             P_arr.append(P)
             I_arr.append(I)
             V_arr.append(V)
+            M_arr.append(M)
 
             eta_arr.append(M * N * 2 * np.pi / 60 / P)
 
@@ -250,7 +251,7 @@ class Drone:
         fig = plt.figure(figsize=[10, 6])
         fig.suptitle("Performance plots for each engine", fontsize=20)
 
-        ax1 = fig.add_subplot(2, 3, 1)
+        ax1 = fig.add_subplot(2, 4, 1)
         Drone.plot(
             ax1,
             T_arr,
@@ -263,7 +264,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax2 = fig.add_subplot(2, 3, 2)
+        ax2 = fig.add_subplot(2, 4, 2)
         Drone.plot(
             ax2,
             N_arr,
@@ -275,7 +276,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax3 = fig.add_subplot(2, 3, 3)
+        ax3 = fig.add_subplot(2, 4, 3)
         Drone.plot(
             ax3,
             N_arr,
@@ -287,7 +288,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax4 = fig.add_subplot(2, 3, 4)
+        ax4 = fig.add_subplot(2, 4, 4)
         Drone.plot(
             ax4,
             N_arr,
@@ -299,25 +300,37 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax5 = fig.add_subplot(2, 3, 5)
+        ax5 = fig.add_subplot(2, 4, 5)
         Drone.plot(
             ax5,
             N_arr,
-            V_arr,
+            M_arr,
             "RPM [-]",
-            "Voltage [V]",
+            "Torque [Nm]",
             verts=[N1, N2, N3],
             xlimit=[0, N3 * 1.1],
             ylimit=[0, T3 * 1.1],
         )
 
-        ax6 = fig.add_subplot(2, 3, 6)
+        ax6 = fig.add_subplot(2, 4, 6)
         Drone.plot(
             ax6,
             N_arr,
             I_arr,
             "RPM [-]",
             "Current [A]",
+            verts=[N1, N2, N3],
+            xlimit=[0, N3 * 1.1],
+            ylimit=[0, T3 * 1.1],
+        )
+
+        ax6 = fig.add_subplot(2, 4, 7)
+        Drone.plot(
+            ax6,
+            N_arr,
+            V_arr,
+            "RPM [-]",
+            "Voltage [V]",
             verts=[N1, N2, N3],
             xlimit=[0, N3 * 1.1],
             ylimit=[0, T3 * 1.1],
