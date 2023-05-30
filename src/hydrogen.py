@@ -21,7 +21,7 @@ class FuelCell:
         def right_linear(x):
             return 46.4505 - 0.17934 * x
 
-        if I > 75:
+        if I > self.Imax:
             raise ValueError("Current larger than maximum: ", I)
         elif I <= 5.3:
             return left_linear(I)
@@ -33,7 +33,7 @@ class FuelCell:
         step = 0.1
         prev_power = 0
 
-        while I < 75:
+        while I < self.Imax:
             V = self.getV(I)
             curr_power = I * V
 

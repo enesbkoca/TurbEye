@@ -13,8 +13,8 @@ class ESC:
         return (Um + Im * self.Re) / Ub
 
     # ESC current
-    def inputI(self, Vm, Im, Ub):
-        I = self.throttle(Vm, Im, Ub) * Im
+    def inputI(self, Um, Im, Ub):
+        I = self.throttle(Um, Im, Ub) * Im
         if I > self.Iemax:
             raise ValueError("ESC current too high: ", I)
         return I

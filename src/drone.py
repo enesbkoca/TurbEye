@@ -42,8 +42,7 @@ class Drone:
         config: Optional[dict] = None,
         propeller: Optional[Propeller] = None,
         motor: Optional[Motor] = None,
-        esc: Optional[ESC] = None,
-        fuelcell: Optional[FuelCell] = None,
+        esc: Optional[ESC] = None
     ) -> None:
         if not config:
             config = configuration.copy()
@@ -75,6 +74,8 @@ class Drone:
                 *config["esc"].values()
             )
 
+        self.fuelcell = FuelCell()
+
         self._config = config
         self.mass = self.compute_weight()
 
@@ -83,6 +84,7 @@ class Drone:
     ) -> Optional[float]:
         m_prop = self.propeller.mass * self.Nm  # Mass of the propellers
         m_motor = self.motor.mass * self.Nm  # Mass of the motors
+        m_esc = self.esc.mass * self.Nm
         m_tot = (
             m_p
             + m_prop
@@ -95,6 +97,7 @@ class Drone:
             + m_pr
             + m_ch
             + m_rad
+            + m_esc
         )
         diff = 10000
         i = 0
@@ -122,6 +125,7 @@ class Drone:
                 + m_hyd
                 + m_ch
                 + m_rad
+                + m_esc
             )
             diff = abs(m_new - m_tot)
             m_tot = m_new
@@ -212,12 +216,22 @@ class Drone:
         plt.plot(x, y, alpha=1.0, label=label)
 
     def plot_PT(self):
-        T_arr = []
-        P_arr = []
-        V_arr = []
-        I_arr = []
-        M_arr = []
-        eta_arr = []
+        T_motor = []
+        P_motor = []
+        V_motor = []
+        I_motor = []
+        M_motor = []
+        eta_motor = []
+
+        throttle = []
+        V_esc = []
+        I_esc = []
+
+        V_fc = []
+        I_fc = []
+        P_fc = []
+
+
         N_arr = range(0, 100000, 10)
         found = False
 
@@ -229,13 +243,32 @@ class Drone:
                 T3 = T
                 N3 = N
                 found = True
-            T_arr.append(T)
-            P_arr.append(P)
-            I_arr.append(I)
-            V_arr.append(V)
-            M_arr.append(M)
+            T_motor.append(T)
+            P_motor.append(P)
+            I_motor.append(I)
+            V_motor.append(V)
+            M_motor.append(M)
 
-            eta_arr.append(M * N * 2 * np.pi / 60 / P)
+            eta_motor.append(M * N * 2 * np.pi / 60 / P)
+
+            P_tot = self.Nm * P + P_pay
+
+            I_f, V_f = self.fuelcell.getIandV(P_tot)
+
+            I_fc.append(I_f)
+            V_fc.append(V_f)
+
+            P_fc.append(I_f * V_f)
+
+            throt = self.esc.throttle(V, I, V_fc)
+            throttle.append(throt)
+
+            I_e = self.esc.inputI(V, I, V_fc)
+            V_e = self.esc.inputV(V_fc, I_fc, 0.1)
+
+            I_esc.append(I_e)
+            V_esc.append(V_e)
+
 
         T1 = self.mass * g / self.Nm
         T2 = self.mass * 2 * g / self.Nm
@@ -248,8 +281,8 @@ class Drone:
         ax1 = fig.add_subplot(2, 4, 1)
         Drone.plot(
             ax1,
-            T_arr,
-            P_arr,
+            T_motor,
+            P_motor,
             "Thrust [N]",
             "Power [W]",
             verts=[T1, T2, T3],
@@ -262,7 +295,7 @@ class Drone:
         Drone.plot(
             ax2,
             N_arr,
-            P_arr,
+            P_motor,
             "RPM [-]",
             "Power [W]",
             verts=[N1, N2, N3],
@@ -274,7 +307,7 @@ class Drone:
         Drone.plot(
             ax3,
             N_arr,
-            T_arr,
+            T_motor,
             "RPM [-]",
             "Thrust [N]",
             verts=[N1, N2, N3],
@@ -286,7 +319,7 @@ class Drone:
         Drone.plot(
             ax4,
             N_arr,
-            eta_arr,
+            eta_motor,
             "RPM [-]",
             "Efficiency [-]",
             verts=[N1, N2, N3],
@@ -298,7 +331,7 @@ class Drone:
         Drone.plot(
             ax5,
             N_arr,
-            M_arr,
+            M_motor,
             "RPM [-]",
             "Torque [Nm]",
             verts=[N1, N2, N3],
@@ -310,7 +343,7 @@ class Drone:
         Drone.plot(
             ax6,
             N_arr,
-            I_arr,
+            I_motor,
             "RPM [-]",
             "Current [A]",
             verts=[N1, N2, N3],
@@ -322,7 +355,7 @@ class Drone:
         Drone.plot(
             ax6,
             N_arr,
-            V_arr,
+            V_motor,
             "RPM [-]",
             "Voltage [V]",
             verts=[N1, N2, N3],
