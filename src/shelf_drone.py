@@ -4,6 +4,7 @@ from src.motor import Motor
 from src.drone import Drone
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 class ShelfPropeller(Propeller):
@@ -17,10 +18,22 @@ class ShelfPropeller(Propeller):
 
         super().__init__(*self.propellers[prop_name])
         self.name = prop_name
+        self.cor_coeff()
 
-    def cor_coeff(self, Cm, Ct):
-        self.Cm = Cm
-        self.Ct = Ct
+
+    def cor_coeff(self):
+        try:
+            data = pd.read_csv(f'../experimental_data/{self.name}.csv')
+            data['Rotation speed (rpm)'] = data['Rotation speed (rpm)'].replace(0, np.nan).dropna()
+            N = data['Rotation speed (rpm)']
+            T = data['Thrust (kgf)'] * 9.80665
+            M = data['Torque (N⋅m)']
+            Ct = T/(self.rho * (N / 60) ** 2 * self.Dp**4)
+            self.Ct = Ct.mean()
+            Cm = M / (self.rho * (N / 60) ** 2 * self.Dp ** 5)
+            self.Cm = Cm.mean()
+        except FileNotFoundError:
+            pass
 
     @classmethod
     def read_prop(cls):
@@ -46,13 +59,12 @@ class ShelfMotor(Motor):
 
 
 if __name__ == "__main__":
-    prop = ShelfPropeller("T-Motor P18x61")
-    motor = ShelfMotor("T-Motor Antigravity MN5008 KV170")
+    prop = ShelfPropeller("T-Motor NS 26x85")
+    motor = ShelfMotor("T-Motor Antigravity MN6007II KV160")
 
     drone = Drone(propeller=prop, motor=motor)
     print(drone.propeller)
     print(drone.motor)
-    drone.propeller.Cm = 0.005
-    drone.propeller.Ct = 0.09
-    drone.plot_PT()
+    print(drone.mass)
+    drone.validation()
 

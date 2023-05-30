@@ -2,7 +2,6 @@ import numpy as np
 
 
 # Aerodynamic characteristics
-rho = 1.225  # Air density
 A = 5  # Aspect Ratio
 epsilon = 0.85  # Oswald efficiency factor
 labda = 0.75
@@ -19,6 +18,8 @@ class Propeller:
         self.Dp = Dp  # Propeller diameter
         self.Hp = Hp  # Propeller pitch
         self.Bp = Bp  # Number of blades in propeller
+
+        self.rho = 1.225  # Air density
 
         self.mass = mass
 
@@ -50,12 +51,12 @@ class Propeller:
         return Ct, Cd, Cm
 
     def forces(self, N):
-        T = self.Ct * rho * (N / 60) ** 2 * self.Dp**4
-        M = self.Cm * rho * (N / 60) ** 2 * self.Dp**5
+        T = self.Ct * self.rho * (N / 60) ** 2 * self.Dp**4
+        M = self.Cm * self.rho * (N / 60) ** 2 * self.Dp**5
         return T, M
 
     def required_rpm(self, T):
-        return 60 * np.sqrt(T / self.Ct / rho / self.Dp**4)
+        return 60 * np.sqrt(T / self.Ct / self.rho / self.Dp**4)
 
     def __repr__(self):
         return self.name

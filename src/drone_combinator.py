@@ -65,5 +65,5 @@ class DroneCombinator:
 
 if __name__ == "__main__":
     combinations = DroneCombinator()
-    combinations.print_drones(count=200, upper_limit=15)
+    combinations.print_drones(count=15, upper_limit=15)
 
