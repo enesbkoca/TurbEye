@@ -1,3 +1,6 @@
+from math import pi
+
+
 class Motor:
     def __init__(self, Kv0, Um0, Im0, Rm, Immax, mass):
         # Motor characteristics
@@ -13,10 +16,15 @@ class Motor:
     def VandI(self, M, N):
         Im = M * self.Kv0 * self.Um0 / 9.55 / (self.Um0 - self.Im0 * self.Rm) + self.Im0
         Um = Im * self.Rm + (self.Um0 - self.Im0 * self.Rm) / (self.Kv0 * self.Um0) * N
-        return Im, Um
+
+        return Um, Im
 
     def __repr__(self):
         return self.name
 
     def __str__(self):
         return self.__repr__()
+
+
+if __name__ == "__main__":
+    ...
