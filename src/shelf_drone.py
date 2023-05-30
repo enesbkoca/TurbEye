@@ -87,5 +87,5 @@ if __name__ == "__main__":
     print(drone.propeller)
     print(drone.motor)
     print(drone.mass)
-    drone.validation()
+    drone.plot_PT()
 
