@@ -4,7 +4,8 @@ import numpy as np
 
 from src.propeller import Propeller
 from src.motor import Motor
-from src.hydrogen import Hydrogen
+from src.hydrogen import Hydrogen, FuelCell
+from src.esc import ESC
 from src.configuration import configuration
 
 import matplotlib.pyplot as plt

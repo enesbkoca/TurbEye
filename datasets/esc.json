@@ -1,0 +1,8 @@
+{
+  "T-Motor FLAME 60A": [80, 60, 0.0735],
+  "T-Motor FLAME 70A": [80, 70, 0.055],
+  "T-Motor FLAME 80A": [120, 80, 0.109],
+  "T-Motor FLAME 100A": [120, 100, 0.139],
+  "T-Motor FLAME 180A": [200, 180, 0.279],
+  "T-Motor FLAME 200A": [240, 200, 0.558]
+}

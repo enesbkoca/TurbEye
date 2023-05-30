@@ -1,7 +1,10 @@
 import json
+
 from src.propeller import Propeller
 from src.motor import Motor
 from src.drone import Drone
+from src.esc import ESC
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -45,9 +48,27 @@ class ShelfMotor(Motor):
             cls.motors = json.load(file)
 
 
+class ShelfESC(ESC):
+    ESCs = None
+
+    def __init__(self, esc_name):
+        self.read_esc()
+        if esc_name not in self.ESCs:
+            raise ValueError("ESC does not exist in database")
+
+        super().__init__(*self.ESCs[esc_name])
+        self.name = esc_name
+
+    @classmethod
+    def read_esc(cls):
+        with open("../datasets/esc.json", "r") as file:
+            cls.ESCs = json.load(file)
+
+
 if __name__ == "__main__":
     prop = ShelfPropeller("T-Motor P18x61")
     motor = ShelfMotor("T-Motor Antigravity MN5008 KV170")
+    esc = ShelfESC("T-Motor FLAME 60A")
 
     drone = Drone(propeller=prop, motor=motor)
     print(drone.propeller)
