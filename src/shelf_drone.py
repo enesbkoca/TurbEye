@@ -76,4 +76,3 @@ if __name__ == "__main__":
     drone.propeller.Cm = 0.005
     drone.propeller.Ct = 0.09
     drone.plot_PT()
-

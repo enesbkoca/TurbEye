@@ -62,3 +62,7 @@ class Propeller:
 
     def __str__(self):
         return self.__repr__()
+
+    @property
+    def dict(self):
+        return {"Dp": self.Dp, "Hp": self.Hp, "Bp": self.Bp, "m_prop": self.mass}

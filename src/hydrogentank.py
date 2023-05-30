@@ -1,4 +1,4 @@
-class Hydrogen:
+class HydrogenTank:
     def __init__(self, E):
         self.U = 34000
         self.mh2 = E / self.U
@@ -34,11 +34,10 @@ class FuelCell:
         prev_power = 0
 
         while I < 75:
-
             V = self.getV(I)
             curr_power = I * V
 
-            if abs(curr_power - power) > abs(prev_power-power):
+            if abs(curr_power - power) > abs(prev_power - power):
                 return I, V
 
             prev_power = curr_power

@@ -1,5 +1,4 @@
 class ESC:
-
     def __init__(self, Iemax, Iecont, mass):
         self.Iemax = Iemax
         self.Iecont = Iecont
@@ -29,6 +28,13 @@ class ESC:
 
     def __str__(self):
         return self.__repr__()
+
+    @property
+    def dict(self):
+        return {"Iemax": self.Iemax,
+                "Iecont": self.Iecont,
+                "m_mass": self.mass}
+
 
 if __name__ == "__main__":
     esc = ESC(120, 100, 0.07)

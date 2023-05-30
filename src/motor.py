@@ -25,6 +25,15 @@ class Motor:
     def __str__(self):
         return self.__repr__()
 
+    @property
+    def dict(self):
+        return {"Kv0": self.Kv0,
+                "Um0": self.Um0,
+                "Im0": self.Im0,
+                "Rm": self.Rm,
+                "Immax": self.Immax,
+                "m_motor": self.mass}
+
 
 if __name__ == "__main__":
     ...

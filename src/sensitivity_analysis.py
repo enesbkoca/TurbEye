@@ -8,10 +8,7 @@ class SensitivityAnalysis:
         self.initial_drone = drone
         self.initial_mass = drone.mass
 
-        self.range = (
-            np.arange(-0.25, 0.26, 0.05)
-            * 100
-        )
+        self.range = np.arange(-0.25, 0.26, 0.05) * 100
 
         self.parameters = list(self.initial_drone.config.keys())
 
@@ -53,7 +50,9 @@ class SensitivityAnalysis:
         fig = plt.figure()
 
         for parameter, x, y in zip(self.parameters, self.x_values, self.mass_values):
-            Drone.plot(fig, x, y, "Parameter Diff [%]", "Mass Diff [%]", label=parameter)
+            Drone.plot(
+                fig, x, y, "Parameter Diff [%]", "Mass Diff [%]", label=parameter
+            )
 
         plt.legend(loc="upper right", ncols=3)
         plt.show()
