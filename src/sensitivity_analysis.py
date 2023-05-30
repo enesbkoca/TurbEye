@@ -53,7 +53,7 @@ class SensitivityAnalysis:
         fig = plt.figure()
 
         for parameter, x, y in zip(self.parameters, self.x_values, self.mass_values):
-            Drone.plot(fig, x, y, "Parameter Diff [%]", "Mass Diff [%]", parameter)
+            Drone.plot(fig, x, y, "Parameter Diff [%]", "Mass Diff [%]", label=parameter)
 
         plt.legend(loc="upper right", ncols=3)
         plt.show()

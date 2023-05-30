@@ -56,6 +56,7 @@ class DroneCombinator:
                 )
             )
 
+        self.table = table
         print(table)
 
     def __getitem__(self, item):
@@ -64,4 +65,4 @@ class DroneCombinator:
 
 if __name__ == "__main__":
     combinations = DroneCombinator()
-    combinations.print_drones(count=20, upper_limit=15)
+    combinations.print_drones(count=200, upper_limit=15)

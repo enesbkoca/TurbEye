@@ -107,8 +107,8 @@ class Drone:
             T_req_m = T_req / self.Nm / co_eff
             self.N = self.propeller.required_rpm(T_req_m)
             M = self.propeller.forces(self.N)[1]
-            IV = self.motor.VandI(M, self.N)
-            P = IV[0] * IV[1]
+            V, I = self.motor.VandI(M, self.N)
+            P = V * I
             self.P_tot = P * self.Nm * tw_f + P_pay
             E_tot = self.P_tot * self.T
             self.hyd = Hydrogen(E_tot)
@@ -134,8 +134,8 @@ class Drone:
                 return None
 
         self.I_ratio = self.check_for_max(m_tot, co_eff)
-        if self.I_ratio > 1:
-            return None
+        # if self.I_ratio > 1:
+        #     return None
 
         return m_tot
 
@@ -144,17 +144,17 @@ class Drone:
         T_req_m = T_req / self.Nm / co_eff
         N = self.propeller.required_rpm(T_req_m)
         M = self.propeller.forces(N)[1]
-        IV = self.motor.VandI(M, N)
+        V, I = self.motor.VandI(M, N)
 
-        return IV[0] / self.motor.Immax
+        return I / self.motor.Immax
 
     def compute_endurance(self, av_t, co_eff=0.9, tw_f=1.2):
         E = self.hyd.mh2 * self.hyd.U
         T_req_m = self.mass * g / self.Nm / co_eff * av_t
         N = self.propeller.required_rpm(T_req_m)
         M = self.propeller.forces(N)[1]
-        IV = self.motor.VandI(M, N)
-        P = IV[0] * IV[1]
+        V, I = self.motor.VandI(M, N)
+        P = V * I
         P_tot = P * self.Nm * tw_f + P_pay
 
         return E / P_tot
@@ -194,10 +194,12 @@ class Drone:
         if verts:
             for i, vert in enumerate(verts):
                 if vertlabels:
-                    plt.plot([vert, vert], [min(y)*0.9, max(y)*1.1], label=vertlabels[i])
+                    plt.plot(
+                        [vert, vert], [min(y) * 0.9, max(y) * 1.1], label=vertlabels[i]
+                    )
                     ax.legend()
                 else:
-                    plt.plot([vert, vert], [min(y)*0.9, max(y)*1.1])
+                    plt.plot([vert, vert], [min(y) * 0.9, max(y) * 1.1])
 
         if xlimit:
             plt.xlim(xlimit)
@@ -209,7 +211,7 @@ class Drone:
 
             y_ = y * ((xlimit[0] < x) & (x < xlimit[1]))
 
-            plt.ylim(top=max(y_)*1.1)
+            plt.ylim(top=max(y_) * 1.1)
 
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
@@ -218,19 +220,26 @@ class Drone:
     def plot_PT(self):
         T_arr = []
         P_arr = []
+        V_arr = []
+        I_arr = []
         eta_arr = []
-        N_arr = range(0, 5000, 10)
+        N_arr = range(0, 100000, 10)
         found = False
+
         for N in N_arr:
             T, M = self.propeller.forces(N)
-            IV = self.motor.VandI(M, N)
-            P = IV[0] * IV[1]
-            if self.motor.Immax < IV[0] and found is False:
+            V, I = self.motor.VandI(M, N)
+
+            P = I * V
+            if self.motor.Immax < I and found is False:
                 T3 = T
                 N3 = N
                 found = True
             T_arr.append(T)
             P_arr.append(P)
+            I_arr.append(I)
+            V_arr.append(V)
+
             eta_arr.append(M * N * 2 * np.pi / 60 / P)
 
         T1 = self.mass * g / self.Nm
@@ -241,7 +250,7 @@ class Drone:
         fig = plt.figure(figsize=[10, 6])
         fig.suptitle("Performance plots for each engine", fontsize=20)
 
-        ax1 = fig.add_subplot(2, 2, 1)
+        ax1 = fig.add_subplot(2, 3, 1)
         Drone.plot(
             ax1,
             T_arr,
@@ -251,10 +260,10 @@ class Drone:
             verts=[T1, T2, T3],
             vertlabels=["Hover", "Max Thrust", "Max Current"],
             xlimit=[0, T3 * 1.1],
-            ylimit=[0, T3 * 1.1]
+            ylimit=[0, T3 * 1.1],
         )
 
-        ax2 = fig.add_subplot(2, 2, 2)
+        ax2 = fig.add_subplot(2, 3, 2)
         Drone.plot(
             ax2,
             N_arr,
@@ -263,10 +272,10 @@ class Drone:
             "Power [W]",
             verts=[N1, N2, N3],
             xlimit=[0, N3 * 1.1],
-            ylimit=[0, T3 * 1.1]
+            ylimit=[0, T3 * 1.1],
         )
 
-        ax3 = fig.add_subplot(2, 2, 3)
+        ax3 = fig.add_subplot(2, 3, 3)
         Drone.plot(
             ax3,
             N_arr,
@@ -275,10 +284,10 @@ class Drone:
             "Thrust [N]",
             verts=[N1, N2, N3],
             xlimit=[0, N3 * 1.1],
-            ylimit=[0, T3 * 1.1]
+            ylimit=[0, T3 * 1.1],
         )
 
-        ax4 = fig.add_subplot(2, 2, 4)
+        ax4 = fig.add_subplot(2, 3, 4)
         Drone.plot(
             ax4,
             N_arr,
@@ -287,7 +296,31 @@ class Drone:
             "Efficiency [-]",
             verts=[N1, N2, N3],
             xlimit=[0, N3 * 1.1],
-            ylimit=[0, T3 * 1.1]
+            ylimit=[0, T3 * 1.1],
+        )
+
+        ax5 = fig.add_subplot(2, 3, 5)
+        Drone.plot(
+            ax5,
+            N_arr,
+            V_arr,
+            "RPM [-]",
+            "Voltage [V]",
+            verts=[N1, N2, N3],
+            xlimit=[0, N3 * 1.1],
+            ylimit=[0, T3 * 1.1],
+        )
+
+        ax6 = fig.add_subplot(2, 3, 6)
+        Drone.plot(
+            ax6,
+            N_arr,
+            I_arr,
+            "RPM [-]",
+            "Current [A]",
+            verts=[N1, N2, N3],
+            xlimit=[0, N3 * 1.1],
+            ylimit=[0, T3 * 1.1],
         )
 
         plt.tight_layout()

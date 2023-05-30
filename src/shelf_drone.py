@@ -40,10 +40,23 @@ class ShelfMotor(Motor):
 
 
 if __name__ == "__main__":
-    prop = ShelfPropeller("T-Motor NS 26x85")
     motor = ShelfMotor("T-Motor Antigravity MN6007II KV160")
+    prop = ShelfPropeller("T-Motor MF2211")
 
-    drone = Drone(propeller=prop, motor=motor)
-    print(drone.propeller)
-    print(drone.motor)
-    drone.plot_PT()
+    our_drone = Drone(motor=motor, propeller=prop)
+
+    motor = ShelfMotor("T-Motor MN5212 KV340")
+    prop = ShelfPropeller("T-Motor P18x61")
+
+    book_drone = Drone(motor=motor, propeller=prop)
+
+    book_drone.plot_PT()
+
+    paper_prop = ShelfPropeller("T-Motor G40x13.1")
+
+    # print(paper_prop.required_rpm(325))
+
+
+    # motor = ShelfMotor("T-Motor MN5212 KV 340")
+
+
