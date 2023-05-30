@@ -4,7 +4,7 @@ import numpy as np
 
 from src.propeller import Propeller
 from src.motor import Motor
-from src.hydrogentank import HydrogenTank, FuelCell
+from src.hydrogen import HydrogenTank, FuelCell
 from src.esc import ESC
 from src.configuration import configuration
 
