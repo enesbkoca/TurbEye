@@ -1,6 +1,8 @@
 from typing import Optional
 
 import numpy as np
+import pandas as pd
+from sklearn.metrics import mean_squared_error
 
 from src.propeller import Propeller
 from src.motor import Motor
@@ -275,7 +277,7 @@ class Drone:
         N1 = self.propeller.required_rpm(T1)
         N2 = self.propeller.required_rpm(T2)
 
-        fig = plt.figure(figsize=[10, 6])
+        fig = plt.figure(figsize=[12, 6])
         fig.suptitle("Performance plots for each engine", fontsize=20)
 
         ax1 = fig.add_subplot(2, 4, 1)
@@ -342,6 +344,18 @@ class Drone:
         ax6 = fig.add_subplot(2, 4, 6)
         Drone.plot(
             ax6,
+            T_arr,
+            M_arr,
+            "Thrust [N]",
+            "Torque [Nm]",
+            verts=[T1, T2, T3],
+            xlimit=[0, T3 * 1.1],
+            ylimit=[0, T3 * 1.1],
+        )
+
+        ax7 = fig.add_subplot(2, 4, 7)
+        Drone.plot(
+            ax7,
             N_arr,
             I_motor,
             "RPM [-]",
@@ -351,9 +365,9 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax6 = fig.add_subplot(2, 4, 7)
+        ax8 = fig.add_subplot(2, 4, 8)
         Drone.plot(
-            ax6,
+            ax8,
             N_arr,
             V_motor,
             "RPM [-]",
@@ -362,6 +376,66 @@ class Drone:
             xlimit=[0, N3 * 1.1],
             ylimit=[0, T3 * 1.1],
         )
+
+        plt.tight_layout()
+        plt.show()
+
+    def validation(self):
+        try:
+            data = pd.read_csv(f'../experimental_data/{self.propeller.name}.csv')
+        except FileNotFoundError:
+            return
+        data = data.sort_values(by=['Rotation speed (rpm)'])
+        N = data['Rotation speed (rpm)']
+        T = data['Thrust (kgf)'] * 9.80665
+        M = data['Torque (N⋅m)']
+        P = data['Electrical power (W)']
+        I = data['Current (A)']
+        eta = data['Motor & ESC efficiency (%)'] / 100
+        T_model = []
+        M_model = []
+        P_model = []
+        eta_model = []
+        for i in N:
+            Ti, Mi = self.propeller.forces(i)
+            V, Ii = self.motor.VandI(Mi, i)
+            etai = Mi * i / (V * Ii) * 2 * np.pi / 60
+            P_model.append(V * Ii)
+            T_model.append(Ti)
+            M_model.append(Mi)
+            eta_model.append(etai)
+
+        fig = plt.figure(figsize=[8, 6])
+
+        ax1 = fig.add_subplot(2, 2, 1)
+        ax1.plot(N, M, label='Actual Values')
+        ax1.plot(N, M_model, label='Model')
+        plt.xlabel('RPM [-]')
+        plt.ylabel('Torque [Nm]')
+        plt.legend()
+
+        ax2 = fig.add_subplot(2, 2, 2)
+        ax2.plot(N, T)
+        ax2.plot(N, T_model)
+        plt.xlabel('RPM [-]')
+        plt.ylabel('Thrust [N]')
+
+        ax3 = fig.add_subplot(2, 2, 3)
+        ax3.plot(N, P)
+        ax3.plot(N, P_model)
+        plt.xlabel('RPM [-]')
+        plt.ylabel('Power [W]')
+
+        ax4 = fig.add_subplot(2, 2, 4)
+        ax4.plot(N, eta)
+        ax4.plot(N, eta_model)
+        plt.xlabel('RPM [-]')
+        plt.ylabel('Efficiency [-]')
+
+        print('Thrust Error', mean_squared_error(T, T_model, squared=False))
+        print('Moment Error', mean_squared_error(M, M_model, squared=False))
+        print('Power Error', mean_squared_error(P, P_model, squared=False))
+        print('Eff Error', mean_squared_error(eta, eta_model, squared=False))
 
         plt.tight_layout()
         plt.show()
