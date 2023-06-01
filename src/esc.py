@@ -7,7 +7,7 @@ class ESC:
         self.name = "Custom ESC"
 
     def resistance(self):
-        return 32.6754 * self.Iecont ** (-0.7669) + 0.5269
+        return 32.6754 * self.Iemax ** (-0.7669) + 0.5269
 
     def throttle(self, Um, Im, Ub):
         return (Um + Im * self.Re) / Ub
