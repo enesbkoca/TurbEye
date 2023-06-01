@@ -43,21 +43,30 @@ class SensitivityAnalysis:
         self.x_values.append(x)
         self.parameters.append(parameter)
 
-    def perform_analysis(self):
-        for type in self.types:
-            for parameter in self.initial_drone.config[type]:
-                self.generate_drones(type, parameter)
+    def perform_analysis(self, typindex=None):
+        if typindex is not None:
+            typ = self.types[typindex]
+            for parameter in self.initial_drone.config[typ]:
+                self.generate_drones(typ, parameter)
+        else:
+            for typ in self.types:
+                for parameter in self.initial_drone.config[typ]:
+                    self.generate_drones(typ, parameter)
 
-    def plot(self):
+    def plot(self, refresh=True):
         fig = plt.figure()
 
         for parameter, x, y in zip(self.parameters, self.x_values, self.mass_values):
             Drone.plot(
                 fig, x, y, "Parameter Diff [%]", "Mass Diff [%]", label=parameter
             )
-
         plt.legend(loc="upper right", ncols=3)
         plt.show()
+
+        if refresh:
+            self.x_values = []
+            self.mass_values = []
+            self.parameters = []
 
 
 if __name__ == "__main__":
@@ -65,5 +74,6 @@ if __name__ == "__main__":
 
     sens = SensitivityAnalysis(d)
 
-    sens.perform_analysis()
-    sens.plot()
+    for i in range(4):
+        sens.perform_analysis(typindex=i)
+        sens.plot()
