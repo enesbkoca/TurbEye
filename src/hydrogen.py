@@ -1,3 +1,6 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
 class HydrogenTank:
     def __init__(self, E):
         self.U = 34000
@@ -44,3 +47,39 @@ class FuelCell:
             I += step
 
         return I, V
+
+    def plot(self):
+        I = np.arange(0, self.Imax, 0.1)
+        get_voltage = np.vectorize(lambda x: self.getV(x))
+        V = get_voltage(I)
+
+        P = I * V
+
+
+
+        fig, ax1 = plt.subplots()
+
+        plt.grid(which="minor", axis="both", linewidth=0.2)
+        plt.grid(which="major", axis="both", linewidth=1)
+        plt.minorticks_on()
+
+
+        ax2 = ax1.twinx()
+        ax1.plot(I, V, 'g-')
+        ax2.plot(I, P, 'b-')
+
+        ax1.set_xlim(0, 75)
+        ax1.set_ylim(0, 55)
+        ax2.set_ylim(0, 3000)
+
+        ax1.set_xlabel('Current [A]')
+        ax1.set_ylabel('Voltage [V]', color='g')
+        ax2.set_ylabel('Power [W]', color='b')
+
+        plt.tight_layout()
+        plt.show()
+
+
+if __name__ == "__main__":
+    fuelcell = FuelCell()
+    fuelcell.plot()
