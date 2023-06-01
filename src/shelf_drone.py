@@ -79,14 +79,15 @@ class ShelfESC(ESC):
 
 
 if __name__ == "__main__":
-    # prop = ShelfPropeller("T-Motor NS 26x85")
-    prop = ShelfPropeller("T-Motor MF2211")
+    prop = ShelfPropeller("T-Motor NS 26x85")
+    # prop = ShelfPropeller("T-Motor MF2211")
     motor = ShelfMotor("T-Motor Antigravity MN6007II KV160")
     esc = ShelfESC("T-Motor FLAME 60A")
 
     drone = Drone(propeller=prop, motor=motor)
     print(drone.propeller)
     print(drone.motor)
-    print(drone.mass)
-    drone.plot_PT()
+    print(drone.hyd.mh2)
+    print(drone.hyd.tank_mass())
+    drone.plot_ESC_FC()
 

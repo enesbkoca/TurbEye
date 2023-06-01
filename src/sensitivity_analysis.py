@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from src.drone import Drone
+from copy import deepcopy
 
 
 class SensitivityAnalysis:
@@ -10,23 +11,22 @@ class SensitivityAnalysis:
 
         self.range = np.arange(-0.25, 0.26, 0.05) * 100
 
-        self.parameters = list(self.initial_drone.config.keys())
-
-        if "Bp" in self.parameters:
-            self.parameters.remove("Bp")
-        if "Nm" in self.parameters:
-            self.parameters.remove("Nm")
+        self.types = list(self.initial_drone.config.keys())
 
         self.x_values = []
         self.mass_values = []
+        self.parameters = []
 
-    def generate_drones(self, parameter):
+    def generate_drones(self, type, parameter):
+        if "Bp" == parameter or "Nm" == parameter:
+            return
+
         mass = []
         x = []
 
         for i in self.range:
-            config = self.initial_drone.config
-            config[parameter] *= 1 + i / 100
+            config = deepcopy(self.initial_drone.config)
+            config[type][parameter] *= 1 + i / 100
 
             drone = Drone(config)
 
@@ -41,21 +41,32 @@ class SensitivityAnalysis:
 
         self.mass_values.append(mass)
         self.x_values.append(x)
+        self.parameters.append(parameter)
 
-    def perform_analysis(self):
-        for parameter in self.parameters:
-            self.generate_drones(parameter)
+    def perform_analysis(self, typindex=None):
+        if typindex is not None:
+            typ = self.types[typindex]
+            for parameter in self.initial_drone.config[typ]:
+                self.generate_drones(typ, parameter)
+        else:
+            for typ in self.types:
+                for parameter in self.initial_drone.config[typ]:
+                    self.generate_drones(typ, parameter)
 
-    def plot(self):
+    def plot(self, refresh=True):
         fig = plt.figure()
 
         for parameter, x, y in zip(self.parameters, self.x_values, self.mass_values):
             Drone.plot(
                 fig, x, y, "Parameter Diff [%]", "Mass Diff [%]", label=parameter
             )
-
         plt.legend(loc="upper right", ncols=3)
         plt.show()
+
+        if refresh:
+            self.x_values = []
+            self.mass_values = []
+            self.parameters = []
 
 
 if __name__ == "__main__":
@@ -63,5 +74,6 @@ if __name__ == "__main__":
 
     sens = SensitivityAnalysis(d)
 
-    sens.perform_analysis()
-    sens.plot()
+    for i in range(4):
+        sens.perform_analysis(typindex=i)
+        sens.plot()
