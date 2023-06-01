@@ -16,7 +16,7 @@ g = 9.80665
 
 # Mass budget inputs
 m_p = 0.64  # Mass of the payload
-m_3d = 1.2  # Mass of the 3D modelling system
+m_3d = 1.3  # Mass of the 3D modelling system
 m_pos = 0.4  # Mass of the positioning system
 m_data = 0.02  # Mass of the data handling system
 m_rad = 0.05  # Mass of the radio system
@@ -244,6 +244,7 @@ class Drone:
             if self.motor.Immax < I and found is False:
                 T3 = T
                 N3 = N
+                print(T3*self.Nm/self.mass/g)
                 found = True
             T_motor.append(T)
             P_motor.append(P)
@@ -277,10 +278,10 @@ class Drone:
         N1 = self.propeller.required_rpm(T1)
         N2 = self.propeller.required_rpm(T2)
 
-        fig = plt.figure(figsize=[12, 9])
+        fig = plt.figure(figsize=[12, 6])
         # fig.suptitle("Performance plots for each engine", fontsize=20)
 
-        ax1 = fig.add_subplot(4, 4, 1)
+        ax1 = fig.add_subplot(2, 4, 1)
         Drone.plot(
             ax1,
             T_motor,
@@ -293,7 +294,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax2 = fig.add_subplot(4, 4, 2)
+        ax2 = fig.add_subplot(2, 4, 2)
         Drone.plot(
             ax2,
             N_arr,
@@ -305,7 +306,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax3 = fig.add_subplot(4, 4, 3)
+        ax3 = fig.add_subplot(2, 4, 3)
         Drone.plot(
             ax3,
             N_arr,
@@ -317,7 +318,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax4 = fig.add_subplot(4, 4, 4)
+        ax4 = fig.add_subplot(2, 4, 4)
         Drone.plot(
             ax4,
             N_arr,
@@ -329,7 +330,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax5 = fig.add_subplot(4, 4, 5)
+        ax5 = fig.add_subplot(2, 4, 5)
         Drone.plot(
             ax5,
             N_arr,
@@ -341,7 +342,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax6 = fig.add_subplot(4, 4, 6)
+        ax6 = fig.add_subplot(2, 4, 6)
         Drone.plot(
             ax6,
             T_motor,
@@ -353,7 +354,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax7 = fig.add_subplot(4, 4, 7)
+        ax7 = fig.add_subplot(2, 4, 7)
         Drone.plot(
             ax7,
             N_arr,
@@ -365,7 +366,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax8 = fig.add_subplot(4, 4, 8)
+        ax8 = fig.add_subplot(2, 4, 8)
         Drone.plot(
             ax8,
             N_arr,
@@ -377,7 +378,60 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax9 = fig.add_subplot(4, 4, 9)
+        plt.tight_layout()
+        plt.show()
+
+    def plot_ESC_FC(self):
+        throttle = []
+        V_esc = []
+        I_esc = []
+
+        V_fc = []
+        I_fc = []
+        P_fc = []
+
+        N_arr = range(0, 10000, 10)
+        found = False
+
+        P_max = self.fuelcell.Imax * self.fuelcell.getV(self.fuelcell.Imax)
+
+        for N in N_arr:
+            T, M = self.propeller.forces(N)
+            V, I = self.motor.VandI(M, N)
+            P = I * V
+
+            P_tot = self.Nm * P + P_pay
+
+            I_f, V_f = self.fuelcell.getIandV(P_tot)
+
+            if self.fuelcell.Imax < I_f and found is False:
+                T3 = T
+                N3 = N
+                print(T3 * self.Nm / self.mass / g)
+                found = True
+
+            I_fc.append(I_f)
+            V_fc.append(V_f)
+
+            P_fc.append(I_f * V_f)
+
+            throt = self.esc.throttle(V, I, V_f)
+            throttle.append(throt)
+
+            I_e = self.esc.inputI(V, I, V_f)
+            V_e = self.esc.inputV(V_f, I_f, 0.1)
+
+            I_esc.append(I_e)
+            V_esc.append(V_e)
+
+        T1 = self.mass * g / self.Nm
+        T2 = self.mass * 2 * g / self.Nm
+        N1 = self.propeller.required_rpm(T1)
+        N2 = self.propeller.required_rpm(T2)
+
+        fig = plt.figure(figsize=[10, 6])
+
+        ax9 = fig.add_subplot(2, 3, 1)
         Drone.plot(
             ax9,
             N_arr,
@@ -387,9 +441,10 @@ class Drone:
             verts=[N1, N2, N3],
             xlimit=[0, N3 * 1.1],
             ylimit=[0, T3 * 1.1],
+            vertlabels=["Hover", "Max Thrust", "Max Power"]
         )
 
-        ax10 = fig.add_subplot(4, 4, 10)
+        ax10 = fig.add_subplot(2, 3, 2)
         Drone.plot(
             ax10,
             N_arr,
@@ -401,7 +456,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax11 = fig.add_subplot(4, 4, 11)
+        ax11 = fig.add_subplot(2, 3, 3)
         Drone.plot(
             ax11,
             N_arr,
@@ -413,7 +468,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax12 = fig.add_subplot(4, 4, 12)
+        ax12 = fig.add_subplot(2, 3, 4)
         Drone.plot(
             ax12,
             N_arr,
@@ -425,7 +480,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax13 = fig.add_subplot(4, 4, 13)
+        ax13 = fig.add_subplot(2, 3, 5)
         Drone.plot(
             ax13,
             N_arr,
@@ -437,7 +492,7 @@ class Drone:
             ylimit=[0, T3 * 1.1],
         )
 
-        ax14 = fig.add_subplot(4, 4, 14)
+        ax14 = fig.add_subplot(2, 3, 6)
         Drone.plot(
             ax14,
             N_arr,
@@ -451,6 +506,7 @@ class Drone:
 
         plt.tight_layout()
         plt.show()
+
 
     def validation(self):
         try:
