@@ -277,8 +277,8 @@ class Drone:
         N1 = self.propeller.required_rpm(T1)
         N2 = self.propeller.required_rpm(T2)
 
-        fig = plt.figure(figsize=[16, 12])
-        fig.suptitle("Performance plots for each engine", fontsize=20)
+        fig = plt.figure(figsize=[12, 9])
+        # fig.suptitle("Performance plots for each engine", fontsize=20)
 
         ax1 = fig.add_subplot(4, 4, 1)
         Drone.plot(
