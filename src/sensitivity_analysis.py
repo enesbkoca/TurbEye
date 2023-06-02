@@ -56,9 +56,19 @@ class SensitivityAnalysis:
     def plot(self, refresh=True):
         fig = plt.figure()
 
-        legend_names = {'Hp': 'Propeller Pitch', 'Dp': 'Propeller Diameter', 'm_prop': 'Propeller Mass', 'T': 'Flight Time', 'TW_R': 'Thrust to Weight Ratio',
-                        'Kv0': 'KV Value', 'Um0': 'No load Voltage', 'Im0': 'No load Current', 'Rm': 'Motor Resistance',
-                        'Immax': 'Maximum Current', 'm_motor': 'Motor Mass'}
+        legend_names = {
+            "Hp": "Propeller Pitch",
+            "Dp": "Propeller Diameter",
+            "m_prop": "Propeller Mass",
+            "T": "Flight Time",
+            "TW_R": "Thrust to Weight Ratio",
+            "Kv0": "KV Value",
+            "Um0": "No load Voltage",
+            "Im0": "No load Current",
+            "Rm": "Motor Resistance",
+            "Immax": "Maximum Current",
+            "m_motor": "Motor Mass",
+        }
 
         for parameter, x, y in zip(self.parameters, self.x_values, self.mass_values):
             legend_name = legend_names[parameter]
