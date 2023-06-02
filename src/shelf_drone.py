@@ -6,7 +6,6 @@ from src.drone import Drone
 from src.esc import ESC
 
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 
 
@@ -22,7 +21,6 @@ class ShelfPropeller(Propeller):
         super().__init__(*self.propellers[prop_name])
         self.name = prop_name
         self.cor_coeff()
-
 
     def cor_coeff(self):
         try:
@@ -87,7 +85,4 @@ if __name__ == "__main__":
     drone = Drone(propeller=prop, motor=motor)
     print(drone.propeller)
     print(drone.motor)
-    print(drone.hyd.mh2)
-    print(drone.hyd.tank_mass())
-    drone.plot_ESC_FC()
-
+    drone.validation()
