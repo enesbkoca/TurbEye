@@ -148,15 +148,17 @@ class Drone:
 
         return I / self.motor.Immax
 
-    def compute_endurance(self, av_t, co_eff=0.9, tw_f=1.2):
+    def compute_endurance(self, av_t, co_eff=0.9, tw_f=1.2, Ppay=None):
         E = self.hyd.mh2 * self.hyd.U
         T_req_m = self.mass * g / self.Nm / co_eff * av_t
         N = self.propeller.required_rpm(T_req_m)
         M = self.propeller.forces(N)[1]
         V, I = self.motor.VandI(M, N)
         P = V * I
-        P_tot = P * self.Nm * tw_f + P_pay
-
+        if Ppay is not None:
+            P_tot = P * self.Nm * tw_f + Ppay
+        else:
+            P_tot = P * self.Nm * tw_f + P_pay
         return E / P_tot
 
     def plot_endurance_TW(self):
