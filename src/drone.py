@@ -16,7 +16,7 @@ g = 9.80665
 
 # Mass budget inputs
 m_p = 0.64  # Mass of the payload
-m_3d = 1.3  # Mass of the 3D modelling system
+m_3d = 1.15  # Mass of the 3D modelling system
 m_pos = 0.4  # Mass of the positioning system
 m_data = 0.02  # Mass of the data handling system
 m_rad = 0.05  # Mass of the radio system
@@ -560,10 +560,30 @@ class Drone:
         plt.xlabel('RPM [-]')
         plt.ylabel('Efficiency [-]')
 
-        print('Thrust Error', mean_squared_error(T, T_model, squared=False))
-        print('Moment Error', mean_squared_error(M, M_model, squared=False))
-        print('Power Error', mean_squared_error(P, P_model, squared=False))
-        print('Eff Error', mean_squared_error(eta, eta_model, squared=False))
+        T_err = mean_squared_error(T, T_model, squared=False)
+        M_err = mean_squared_error(M, M_model, squared=False)
+        P_err = mean_squared_error(P, P_model, squared=False)
+        eta_err = mean_squared_error(eta, eta_model, squared=False)
+
+        T_mean = np.mean(T_model)
+        M_mean = np.mean(M_model)
+        P_mean = np.mean(P_model)
+        eta_mean = np.mean(eta_model)
+
+        print('Thrust Error', T_err)
+        print('Moment Error', M_err)
+        print('Power Error', P_err)
+        print('Eff Error', eta_err)
+
+        print(T_mean)
+        print(M_mean)
+        print(P_mean)
+        print(eta_mean)
+
+        print(T_err/T_mean)
+        print(M_err/M_mean)
+        print(P_err/P_mean)
+        print(eta_err/eta_mean)
 
         plt.tight_layout()
         plt.show()
