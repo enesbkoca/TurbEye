@@ -27,7 +27,7 @@ class ConverterTest(unittest.TestCase):
     def test_step_up(self):
         I_fuelcell = 20
         V_fuelcell = 40
-        P_fuelcell = I_fuelcell *  V_fuelcell
+        P_fuelcell = I_fuelcell * V_fuelcell
 
         I_output, V_output = self.converter.step_up(I_fuelcell, V_fuelcell)
 

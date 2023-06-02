@@ -2,6 +2,7 @@ import unittest
 from src.esc import ESC
 from numpy import isclose
 
+
 class ESCTest(unittest.TestCase):
     def setUp(self) -> None:
         self.esc = ESC(120, 100, 0.05)
@@ -31,7 +32,9 @@ class ESCTest(unittest.TestCase):
         self.assertTrue(isclose(throttle_high, 0.7145, rtol=1e-3, atol=1e-3))
 
         throttle_low = self.esc.throttle(20, 4, 70)
-        self.assertTrue(isclose(throttle_low, 0.2858, rtol=1e-3, atol=1e-3), msg=throttle_low)
+        self.assertTrue(
+            isclose(throttle_low, 0.2858, rtol=1e-3, atol=1e-3), msg=throttle_low
+        )
 
         self.assertTrue(throttle_high > throttle_low)
         self.assertTrue(throttle_high > 0 and throttle_low > 0)

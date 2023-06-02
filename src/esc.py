@@ -28,9 +28,7 @@ class ESC:
 
     @property
     def dict(self):
-        return {"Iemax": self.Iemax,
-                "Iecont": self.Iecont,
-                "m_mass": self.mass}
+        return {"Iemax": self.Iemax, "Iecont": self.Iecont, "m_mass": self.mass}
 
 
 if __name__ == "__main__":

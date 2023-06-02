@@ -6,18 +6,18 @@ import numpy as np
 class TestDrone(unittest.TestCase):
     def setUp(self) -> None:
         config = {
-    "mission": {"T": 1, "Nm": 4, "TW_R": 2},
-    "propeller": {"Dp": 0.5, "Hp": 0.1, "Bp": 2, "m_prop": 0.1},
-    "motor": {
-        "Kv0": 100,
-        "Um0": 20,
-        "Im0": 0.7,
-        "Rm": 0.2,
-        "Immax": 24,
-        "m_motor": 0.175,
-    },
-    "esc": {"Iemax": 80, "Iecont": 60, "mass": 0.006},
-            }
+            "mission": {"T": 1, "Nm": 4, "TW_R": 2},
+            "propeller": {"Dp": 0.5, "Hp": 0.1, "Bp": 2, "m_prop": 0.1},
+            "motor": {
+                "Kv0": 100,
+                "Um0": 20,
+                "Im0": 0.7,
+                "Rm": 0.2,
+                "Immax": 24,
+                "m_motor": 0.175,
+            },
+            "esc": {"Iemax": 80, "Iecont": 60, "mass": 0.006},
+        }
 
         self.D = Drone(config=config)
 
@@ -51,9 +51,8 @@ class TestDrone(unittest.TestCase):
         M = self.D.propeller.forces(N)[1]
         V, I = self.D.motor.VandI(M, N)
         P = V * I
-        P_tot = P*self.D.Nm
-        self.assertTrue(np.allclose(E/P_tot, Time_model))
-
+        P_tot = P * self.D.Nm
+        self.assertTrue(np.allclose(E / P_tot, Time_model))
 
 
 if __name__ == "__main__":
