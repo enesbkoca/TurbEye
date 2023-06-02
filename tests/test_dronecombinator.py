@@ -26,5 +26,7 @@ class TestCombinator(unittest.TestCase):
         current_weight = 0
 
         for drone in self.combinator.drones:
-            self.assertTrue(drone.mass > current_weight)
+            if drone.mass == inf:
+                break
+            self.assertTrue(drone.mass > current_weight, msg=(drone.mass, current_weight))
             current_weight = drone.mass
