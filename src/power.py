@@ -17,11 +17,11 @@ class HydrogenTank:
 class StepUpConverter:
     def __init__(self):
         self.n_efficiency = 0.95
-        self.V_output = 55
+        self.V_output = 42
         self.I_output_max = 110
 
-    def step_up(self, I_fc, V_fc):
-        power = V_fc * I_fc * self.n_efficiency
+    def step_up(self, I_fuelcell, V_fuelcell):
+        power = V_fuelcell * I_fuelcell * self.n_efficiency
 
         I_output = min(power / self.V_output, self.I_output_max)
 
@@ -33,7 +33,7 @@ class FuelCell:
         self.Imax = 75
         self.converter = StepUpConverter()
 
-    def getV(self, I):
+    def get_voltage(self, I):
         def left_linear(x):
             return 53 - 1.4151 * x
 
@@ -47,13 +47,13 @@ class FuelCell:
         else:
             return right_linear(I)
 
-    def getIandV(self, power):
+    def get_current_voltage(self, power):
         I = 0
         step = 0.1
         prev_power = 0
 
         while I < self.Imax:
-            V = self.getV(I)
+            V = self.get_voltage(I)
             curr_power = I * V
 
             if abs(curr_power - power) > abs(prev_power - power):
@@ -69,11 +69,11 @@ class FuelCell:
 
     def plot(self):
         I = np.arange(0, self.Imax, 0.1)
-        get_voltage = np.vectorize(lambda x: self.getV(x))
+        get_voltage = np.vectorize(lambda x: self.get_voltage(x))
         V = get_voltage(I)
         P = I * V
 
-        converter_vectorized = np.vectorize(lambda x: self.getIandV(x))
+        converter_vectorized = np.vectorize(lambda x: self.get_current_voltage(x))
         I_converter, V_converter = converter_vectorized(P)
 
         P_converter = I_converter * V_converter
@@ -103,9 +103,6 @@ class FuelCell:
         plt.legend()
         plt.tight_layout()
         plt.show()
-
-
-
 
 
 if __name__ == "__main__":
