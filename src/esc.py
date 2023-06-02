@@ -14,10 +14,7 @@ class ESC:
 
     # ESC current
     def inputI(self, Um, Im, Ub):
-        I = self.throttle(Um, Im, Ub) * Im
-        # if I > self.Iemax:
-        #     raise ValueError("ESC current too high: ", I)
-        return I
+        return self.throttle(Um, Im, Ub) * Im
 
     # ESC voltage
     def inputV(self, Ub, Ib, Rb):
