@@ -9,6 +9,8 @@ class SensitivityAnalysis:
         self.initial_drone = drone
         self.initial_mass = drone.mass
 
+        self.drones = []
+
         self.range = np.arange(-0.25, 0.26, 0.025) * 100
 
         self.types = list(self.initial_drone.config.keys())
@@ -29,6 +31,7 @@ class SensitivityAnalysis:
             config[type][parameter] *= 1 + i / 100
 
             drone = Drone(config)
+            self.drones.append(drone)
 
             if drone.mass:
                 mass.append(drone.mass)
@@ -43,9 +46,9 @@ class SensitivityAnalysis:
         self.x_values.append(x)
         self.parameters.append(parameter)
 
-    def perform_analysis(self, typindex=None):
-        if typindex is not None:
-            typ = self.types[typindex]
+    def perform_analysis(self, typeindex=None):
+        if typeindex is not None:
+            typ = self.types[typeindex]
             for parameter in self.initial_drone.config[typ]:
                 self.generate_drones(typ, parameter)
         else:
@@ -91,5 +94,5 @@ if __name__ == "__main__":
     sens = SensitivityAnalysis(d)
 
     for i in range(3):
-        sens.perform_analysis(typindex=i)
+        sens.perform_analysis(typeindex=i)
         sens.plot()
