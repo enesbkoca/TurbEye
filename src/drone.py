@@ -26,7 +26,6 @@ m_ch = 0.5  # Mass of the chassis
 # Mass of Hydrogen propulsion subsystem
 m_fc = 3  # Mass of the hydrogen fuel cell
 m_pr = 0.305  # Mass of the pressure regulator
-m_converter = 1  # Mass of Step-up converter
 
 
 P_cam = 10
@@ -98,7 +97,6 @@ class Drone:
             + m_ch
             + m_rad
             + m_esc
-            + m_converter
         )
         diff = 10000
         i = 0
@@ -127,7 +125,6 @@ class Drone:
                 + m_ch
                 + m_rad
                 + m_esc
-                + m_converter
             )
             diff = abs(m_new - m_tot)
             m_tot = m_new

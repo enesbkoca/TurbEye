@@ -66,7 +66,7 @@ class FuelCell:
         V = get_voltage(I)
         P = I * V
 
-        fig, ax1 = plt.subplots()
+        fig, ax1 = plt.subplots(figsize=(6,3))
 
         plt.grid(which="minor", axis="both", linewidth=0.2)
         plt.grid(which="major", axis="both", linewidth=1)
