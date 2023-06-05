@@ -6,6 +6,7 @@ from src.drone import Drone
 from src.esc import ESC
 
 import numpy as np
+import matplotlib.pyplot as plt
 import pandas as pd
 
 
@@ -24,14 +25,16 @@ class ShelfPropeller(Propeller):
 
     def cor_coeff(self):
         try:
-            data = pd.read_csv(f'../experimental_data/{self.name}.csv')
-            data['Rotation speed (rpm)'] = data['Rotation speed (rpm)'].replace(0, np.nan).dropna()
-            N = data['Rotation speed (rpm)']
-            T = data['Thrust (kgf)'] * 9.80665
-            M = data['Torque (N⋅m)']
-            Ct = T/(self.rho * (N / 60) ** 2 * self.Dp**4)
+            data = pd.read_csv(f"../experimental_data/{self.name}.csv")
+            data["Rotation speed (rpm)"] = (
+                data["Rotation speed (rpm)"].replace(0, np.nan).dropna()
+            )
+            N = data["Rotation speed (rpm)"]
+            T = data["Thrust (kgf)"] * 9.80665
+            M = data["Torque (N⋅m)"]
+            Ct = T / (self.rho * (N / 60) ** 2 * self.Dp**4)
             self.Ct = Ct.mean()
-            Cm = M / (self.rho * (N / 60) ** 2 * self.Dp ** 5)
+            Cm = M / (self.rho * (N / 60) ** 2 * self.Dp**5)
             self.Cm = Cm.mean()
         except FileNotFoundError:
             pass
@@ -78,11 +81,9 @@ class ShelfESC(ESC):
 
 if __name__ == "__main__":
     prop = ShelfPropeller("T-Motor NS 26x85")
-    # prop = ShelfPropeller("T-Motor MF2211")
-    motor = ShelfMotor("T-Motor Antigravity MN6007II KV160")
+    motor = ShelfMotor("T-Motor Antigravity MN6007II KV320")
     esc = ShelfESC("T-Motor FLAME 60A")
 
-    drone = Drone(propeller=prop, motor=motor)
-    print(drone.propeller)
-    print(drone.motor)
-    drone.validation()
+    drone = Drone(propeller=prop, motor=motor, esc=esc)
+    drone.plot_PT()
+    drone.plot_ESC_FC()

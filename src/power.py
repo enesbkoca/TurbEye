@@ -14,24 +14,9 @@ class HydrogenTank:
         return self.mh2 + self.tank_mass()
 
 
-class StepUpConverter:
-    def __init__(self):
-        self.n_efficiency = 0.95
-        self.V_output = 42
-        self.I_output_max = 110
-
-    def step_up(self, I_fuelcell, V_fuelcell):
-        power = V_fuelcell * I_fuelcell * self.n_efficiency
-
-        I_output = min(power / self.V_output, self.I_output_max)
-
-        return I_output, self.V_output
-
-
 class FuelCell:
     def __init__(self):
         self.Imax = 75
-        self.converter = StepUpConverter()
 
     def get_voltage(self, I):
         def left_linear(x):
@@ -41,42 +26,46 @@ class FuelCell:
             return 46.4505 - 0.17934 * x
 
         if I > self.Imax:
-            raise ValueError("Current larger than maximum: ", I)
-        elif I <= 5.3:
+            raise ValueError(f"Current larger than maximum: {I}")
+        elif 0 <= I <= 5.3:
             return left_linear(I)
-        else:
+        elif 5.3 < I <= self.Imax:
             return right_linear(I)
+        else:
+            raise ValueError(f"Cannot get voltage from current: {I}")
 
     def get_current_voltage(self, power):
-        I = 0
-        step = 0.1
-        prev_power = 0
 
-        while I < self.Imax:
-            V = self.get_voltage(I)
-            curr_power = I * V
+        diff = 0.1
 
-            if abs(curr_power - power) > abs(prev_power - power):
-                I_output, V_output = self.converter.step_up(I, V)
-                return I_output, V_output
 
-            prev_power = curr_power
-            I += step
+        left_I = 0
+        right_I = self.Imax
 
-        I_output, V_output = self.converter.step_up(I, V)
+        mid_I = (left_I + right_I) / 2
+        mid_V = self.get_voltage(mid_I)
 
-        return I_output, V_output
+        mid_power = mid_I * mid_V
+
+        while mid_I < self.Imax and abs(mid_power - power) > diff:
+
+            if mid_power > power:
+                right_I = mid_I
+            elif mid_power < power:
+                left_I = mid_I
+
+            mid_I = (left_I + right_I) / 2
+            mid_V = self.get_voltage(mid_I)
+
+            mid_power = mid_I * mid_V
+
+        return mid_I, mid_V
 
     def plot(self):
         I = np.arange(0, self.Imax, 0.1)
         get_voltage = np.vectorize(lambda x: self.get_voltage(x))
         V = get_voltage(I)
         P = I * V
-
-        converter_vectorized = np.vectorize(lambda x: self.get_current_voltage(x))
-        I_converter, V_converter = converter_vectorized(P)
-
-        P_converter = I_converter * V_converter
 
         fig, ax1 = plt.subplots()
 
@@ -86,21 +75,16 @@ class FuelCell:
 
         ax2 = ax1.twinx()
         ax1.plot(I, V, "y")
-        ax1.plot(I_converter, V_converter, "y-.")
-        ax2.plot(-2, -2, "k-.", label="Converter")
-        ax2.plot(-1, -1, "k", label="Fuel Cell")
 
         ax2.plot(I, P, "m")
-        ax2.plot(I_converter, P_converter, "m-.")
         ax1.set_xlim(0, 75)
-        ax1.set_ylim(0, 60)
+        ax1.set_ylim(0, 55)
         ax2.set_ylim(0, 3000)
 
         ax1.set_xlabel("Current [A]")
         ax1.set_ylabel("Voltage [V]", color="y")
         ax2.set_ylabel("Power [W]", color="m")
 
-        plt.legend()
         plt.tight_layout()
         plt.show()
 
