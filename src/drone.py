@@ -44,7 +44,8 @@ class Drone:
         config: Optional[dict] = None,
         propeller: Optional[Propeller] = None,
         motor: Optional[Motor] = None,
-        esc: Optional[ESC] = None
+        esc: Optional[ESC] = None,
+        tank_mass: Optional[float] = None
     ) -> None:
         if not config:
             config = configuration.copy()
@@ -79,10 +80,10 @@ class Drone:
         self.fuelcell = FuelCell()
 
         self._config = config
-        self.mass = self.compute_weight()
+        self.mass = self.compute_weight(tank_mass=tank_mass)
 
     def compute_weight(
-        self, max_iter: int = 1000, tw_f=1.2, co_eff=0.9
+        self, max_iter: int = 1000, tw_f=1.2, co_eff=0.9, tank_mass=None
     ) -> Optional[float]:
         m_prop = self.propeller.mass * self.Nm  # Mass of the propellers
         m_motor = self.motor.mass * self.Nm  # Mass of the motors
@@ -112,7 +113,7 @@ class Drone:
             P = V * I
             self.P_tot = P * self.Nm * tw_f + P_pay
             E_tot = self.P_tot * self.T
-            self.hyd = HydrogenTank(E_tot)
+            self.hyd = HydrogenTank(E_tot, tank_mass=tank_mass)
             m_hyd = self.hyd.tot_mass()
             m_new = (
                 m_p
@@ -148,8 +149,11 @@ class Drone:
 
         return I / self.motor.Immax
 
-    def compute_endurance(self, av_t, co_eff=0.9, tw_f=1.2, Ppay=None):
-        E = self.hyd.mh2 * self.hyd.U
+    def compute_endurance(self, av_t, co_eff=0.9, tw_f=1.2, mh2=None, Ppay=None):
+        if mh2 is None:
+            E = self.hyd.mh2 * self.hyd.U
+        else:
+            E = mh2 * self.hyd.U
         T_req_m = self.mass * g / self.Nm / co_eff * av_t
         N = self.propeller.required_rpm(T_req_m)
         M = self.propeller.forces(N)[1]

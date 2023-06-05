@@ -44,6 +44,5 @@ class TestShelfDrone(unittest.TestCase):
         self.assertAlmostEqual(Ct.mean(), cor_prop.Ct)
 
 
-
 if __name__ == '__main__':
     unittest.main()
