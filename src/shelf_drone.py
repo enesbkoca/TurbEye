@@ -81,7 +81,7 @@ class ShelfESC(ESC):
 
 if __name__ == "__main__":
     prop = ShelfPropeller("T-Motor NS 26x85")
-    motor = ShelfMotor("T-Motor Antigravity MN6007II KV320")
+    motor = ShelfMotor("T-Motor Antigravity MN6007II KV160")
     esc = ShelfESC("T-Motor FLAME 60A")
 
     drone = Drone(propeller=prop, motor=motor, esc=esc)

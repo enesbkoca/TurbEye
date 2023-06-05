@@ -398,13 +398,13 @@ class Drone:
             V, I = self.motor.VandI(M, N)
             P = I * V
 
-            V_f, I_f = self.fuelcell.get_current_voltage(8*P + P_pay)
+            V_f = self.fuelcell.get_current_voltage(self.Nm * P)[1]
 
             throt = self.esc.throttle(V, I, V_f)
             throttle.append(throt)
 
             I_e = self.esc.inputI(V, I, V_f)
-            # I_f = I_e * self.Nm + I_other
+            I_f = I_e * self.Nm + I_other
             V_e = self.esc.inputV(V_f, I_f, 0.1)
 
             I_esc.append(I_e)
