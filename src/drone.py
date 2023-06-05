@@ -2,14 +2,14 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-
-# from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error
 
 from src.propeller import Propeller
 from src.motor import Motor
 from src.power import HydrogenTank, FuelCell
 from src.esc import ESC
 from src.configuration import configuration
+
 import matplotlib.pyplot as plt
 
 g = 9.80665
@@ -27,7 +27,6 @@ m_ch = 0.5  # Mass of the chassis
 m_fc = 3  # Mass of the hydrogen fuel cell
 m_pr = 0.305  # Mass of the pressure regulator
 
-
 P_cam = 10
 P_ch = 5
 P_3d = 15
@@ -37,8 +36,6 @@ P_rad = 1
 P_elec = 5
 
 P_pay = P_cam + P_ch + P_3d + P_pos + P_data + P_rad + P_elec
-
-I_other = 1
 
 
 class Drone:
@@ -60,7 +57,9 @@ class Drone:
             self.propeller = propeller
             config["propeller"] = propeller.dict
         else:
-            self.propeller = Propeller(*config["propeller"].values())
+            self.propeller = Propeller(
+                *config["propeller"].values()
+            )
 
         if motor:
             self.motor = motor
@@ -149,9 +148,10 @@ class Drone:
     def compute_endurance(self, av_t, co_eff=0.9, tw_f=1.2, mh2=None, Ppay=None):
         if mh2 is None:
             E = self.hyd.mh2 * self.hyd.U
+            T_req_m = self.mass * g / self.Nm / co_eff * av_t
         else:
             E = mh2 * self.hyd.U
-        T_req_m = self.mass * g / self.Nm / co_eff * av_t
+            T_req_m = (self.mass - self.hyd.mh2 + mh2) * g / self.Nm / co_eff * av_t
         N = self.propeller.required_rpm(T_req_m)
         M = self.propeller.forces(N)[1]
         V, I = self.motor.VandI(M, N)
@@ -234,6 +234,7 @@ class Drone:
         I_fc = []
         P_fc = []
 
+
         N_arr = range(0, 100000, 10)
         found = False
 
@@ -244,7 +245,7 @@ class Drone:
             if self.motor.Immax < I and found is False:
                 T3 = T
                 N3 = N
-                print(T3 * self.Nm / self.mass / g)
+                print(T3*self.Nm/self.mass/g)
                 found = True
             T_motor.append(T)
             P_motor.append(P)
@@ -256,7 +257,7 @@ class Drone:
 
             P_tot = self.Nm * P + P_pay
 
-            I_f, V_f = self.fuelcell.get_current_voltage(P_tot)
+            I_f, V_f = self.fuelcell.getIandV(P_tot)
 
             I_fc.append(I_f)
             V_fc.append(V_f)
@@ -271,6 +272,7 @@ class Drone:
 
             I_esc.append(I_e)
             V_esc.append(V_e)
+
 
         T1 = self.mass * g / self.Nm
         T2 = self.mass * 2 * g / self.Nm
@@ -392,39 +394,36 @@ class Drone:
         N_arr = range(0, 10000, 10)
         found = False
 
-        P_max = self.fuelcell.Imax * self.fuelcell.get_voltage(self.fuelcell.Imax)
+        P_max = self.fuelcell.Imax * self.fuelcell.getV(self.fuelcell.Imax)
 
         for N in N_arr:
             T, M = self.propeller.forces(N)
             V, I = self.motor.VandI(M, N)
             P = I * V
 
-            V_f = self.fuelcell.get_current_voltage(self.Nm * P)[1]
+            P_tot = self.Nm * P + P_pay
+
+            I_f, V_f = self.fuelcell.getIandV(P_tot)
+
+            if self.fuelcell.Imax < I_f and found is False:
+                T3 = T
+                N3 = N
+                print(T3 * self.Nm / self.mass / g)
+                found = True
+
+            I_fc.append(I_f)
+            V_fc.append(V_f)
+
+            P_fc.append(I_f * V_f)
 
             throt = self.esc.throttle(V, I, V_f)
             throttle.append(throt)
 
             I_e = self.esc.inputI(V, I, V_f)
-            I_f = I_e * self.Nm + I_other
             V_e = self.esc.inputV(V_f, I_f, 0.1)
 
             I_esc.append(I_e)
             V_esc.append(V_e)
-
-            V_fc.append(V_f)
-            I_fc.append(I_f)
-
-            P_f = V_f * I_f
-            P_fc.append(P_f)
-
-            if P_f > 1000:
-                print()
-
-            if P_f > P_max and found is False:
-                T3 = T
-                N3 = N
-                print(T3 * self.Nm / self.mass / g)
-                found = True
 
         T1 = self.mass * g / self.Nm
         T2 = self.mass * 2 * g / self.Nm
@@ -443,7 +442,7 @@ class Drone:
             verts=[N1, N2, N3],
             xlimit=[0, N3 * 1.1],
             ylimit=[0, T3 * 1.1],
-            vertlabels=["Hover", "Max Thrust", "Max Power"],
+            vertlabels=["Hover", "Max Thrust", "Max Power"]
         )
 
         ax10 = fig.add_subplot(2, 3, 2)
@@ -509,18 +508,19 @@ class Drone:
         plt.tight_layout()
         plt.show()
 
+
     def validation(self):
         try:
-            data = pd.read_csv(f"../experimental_data/{self.propeller.name}.csv")
+            data = pd.read_csv(f'../experimental_data/{self.propeller.name}.csv')
         except FileNotFoundError:
             return
-        data = data.sort_values(by=["Rotation speed (rpm)"])
-        N = data["Rotation speed (rpm)"]
-        T = data["Thrust (kgf)"] * 9.80665
-        M = data["Torque (N⋅m)"]
-        P = data["Electrical power (W)"]
-        I = data["Current (A)"]
-        eta = data["Motor & ESC efficiency (%)"] / 100
+        data = data.sort_values(by=['Rotation speed (rpm)'])
+        N = data['Rotation speed (rpm)']
+        T = data['Thrust (kgf)'] * 9.80665
+        M = data['Torque (N⋅m)']
+        P = data['Electrical power (W)']
+        I = data['Current (A)']
+        eta = data['Motor & ESC efficiency (%)'] / 100
         T_model = []
         M_model = []
         P_model = []
@@ -537,54 +537,54 @@ class Drone:
         fig = plt.figure(figsize=[8, 6])
 
         ax1 = fig.add_subplot(2, 2, 1)
-        ax1.plot(N, M, label="Actual Values")
-        ax1.plot(N, M_model, label="Model")
-        plt.xlabel("RPM [-]")
-        plt.ylabel("Torque [Nm]")
+        ax1.plot(N, M, label='Actual Values')
+        ax1.plot(N, M_model, label='Model')
+        plt.xlabel('RPM [-]')
+        plt.ylabel('Torque [Nm]')
         plt.legend()
 
         ax2 = fig.add_subplot(2, 2, 2)
         ax2.plot(N, T)
         ax2.plot(N, T_model)
-        plt.xlabel("RPM [-]")
-        plt.ylabel("Thrust [N]")
+        plt.xlabel('RPM [-]')
+        plt.ylabel('Thrust [N]')
 
         ax3 = fig.add_subplot(2, 2, 3)
         ax3.plot(N, P)
         ax3.plot(N, P_model)
-        plt.xlabel("RPM [-]")
-        plt.ylabel("Power [W]")
+        plt.xlabel('RPM [-]')
+        plt.ylabel('Power [W]')
 
         ax4 = fig.add_subplot(2, 2, 4)
         ax4.plot(N, eta)
         ax4.plot(N, eta_model)
-        plt.xlabel("RPM [-]")
-        plt.ylabel("Efficiency [-]")
+        plt.xlabel('RPM [-]')
+        plt.ylabel('Efficiency [-]')
 
-        # T_err = mean_squared_error(T, T_model, squared=False)
-        # M_err = mean_squared_error(M, M_model, squared=False)
-        # P_err = mean_squared_error(P, P_model, squared=False)
-        # eta_err = mean_squared_error(eta, eta_model, squared=False)
-        #
-        # T_mean = np.mean(T_model)
-        # M_mean = np.mean(M_model)
-        # P_mean = np.mean(P_model)
-        # eta_mean = np.mean(eta_model)
-        #
-        # print('Thrust Error', T_err)
-        # print('Moment Error', M_err)
-        # print('Power Error', P_err)
-        # print('Eff Error', eta_err)
-        #
-        # print(T_mean)
-        # print(M_mean)
-        # print(P_mean)
-        # print(eta_mean)
-        #
-        # print(T_err/T_mean)
-        # print(M_err/M_mean)
-        # print(P_err/P_mean)
-        # print(eta_err/eta_mean)
+        T_err = mean_squared_error(T, T_model, squared=False)
+        M_err = mean_squared_error(M, M_model, squared=False)
+        P_err = mean_squared_error(P, P_model, squared=False)
+        eta_err = mean_squared_error(eta, eta_model, squared=False)
+
+        T_mean = np.mean(T_model)
+        M_mean = np.mean(M_model)
+        P_mean = np.mean(P_model)
+        eta_mean = np.mean(eta_model)
+
+        print('Thrust Error', T_err)
+        print('Moment Error', M_err)
+        print('Power Error', P_err)
+        print('Eff Error', eta_err)
+
+        print(T_mean)
+        print(M_mean)
+        print(P_mean)
+        print(eta_mean)
+
+        print(T_err/T_mean)
+        print(M_err/M_mean)
+        print(P_err/P_mean)
+        print(eta_err/eta_mean)
 
         plt.tight_layout()
         plt.show()
@@ -604,6 +604,4 @@ class Drone:
 
 if __name__ == "__main__":
     drone = Drone()
-
     drone.plot_PT()
-    drone.plot_ESC_FC()
