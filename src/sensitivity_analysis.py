@@ -9,6 +9,8 @@ class SensitivityAnalysis:
         self.initial_drone = drone
         self.initial_mass = drone.mass
 
+        self.drones = []
+
         self.range = np.arange(-0.25, 0.26, 0.025) * 100
 
         self.types = list(self.initial_drone.config.keys())
@@ -29,6 +31,7 @@ class SensitivityAnalysis:
             config[type][parameter] *= 1 + i / 100
 
             drone = Drone(config)
+            self.drones.append(drone)
 
             if drone.mass:
                 mass.append(drone.mass)

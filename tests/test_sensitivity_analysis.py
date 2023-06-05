@@ -44,6 +44,13 @@ class SensitivityTest(unittest.TestCase):
             "Bp" not in self.sa.parameters and "Nm" not in self.sa.parameters
         )
 
+    def test_different_drones(self):
+        configs = []
+        for drone in self.sa.drones:
+            self.assertTrue(drone.config not in configs)
+
+            configs.append(drone.config)
+
 
 if __name__ == "__main__":
     unittest.main()

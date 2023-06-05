@@ -38,7 +38,6 @@ class FuelCell:
 
         diff = 0.1
 
-
         left_I = 0
         right_I = self.Imax
 
