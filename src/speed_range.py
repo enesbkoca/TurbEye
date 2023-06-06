@@ -11,7 +11,7 @@ class SpeedRange(Drone):
         self.S_x = 85000E-6  # Front surface area
         self.S_y = 14700E-6  # Side surface area
         self.S_z = 209500E-6  # Top surface area
-        self.Cd = 1.55
+        self.Cd = 2
 
         self.compute_sides()
 
