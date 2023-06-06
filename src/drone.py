@@ -2,7 +2,7 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import mean_squared_error
+# from sklearn.metrics import mean_squared_error
 
 from src.propeller import Propeller
 from src.motor import Motor
@@ -27,6 +27,7 @@ m_ch = 0.5  # Mass of the chassis
 m_fc = 3  # Mass of the hydrogen fuel cell
 m_pr = 0.305  # Mass of the pressure regulator
 
+
 P_cam = 10
 P_ch = 5
 P_3d = 15
@@ -36,6 +37,8 @@ P_rad = 1
 P_elec = 5
 
 P_pay = P_cam + P_ch + P_3d + P_pos + P_data + P_rad + P_elec
+
+I_other = 1
 
 
 class Drone:
@@ -257,7 +260,7 @@ class Drone:
 
             P_tot = self.Nm * P + P_pay
 
-            I_f, V_f = self.fuelcell.getIandV(P_tot)
+            I_f, V_f = self.fuelcell.get_current_voltage(P_tot)
 
             I_fc.append(I_f)
             V_fc.append(V_f)
@@ -394,36 +397,39 @@ class Drone:
         N_arr = range(0, 10000, 10)
         found = False
 
-        P_max = self.fuelcell.Imax * self.fuelcell.getV(self.fuelcell.Imax)
+        P_max = self.fuelcell.Imax * self.fuelcell.get_voltage(self.fuelcell.Imax)
 
         for N in N_arr:
             T, M = self.propeller.forces(N)
             V, I = self.motor.VandI(M, N)
             P = I * V
 
-            P_tot = self.Nm * P + P_pay
-
-            I_f, V_f = self.fuelcell.getIandV(P_tot)
-
-            if self.fuelcell.Imax < I_f and found is False:
-                T3 = T
-                N3 = N
-                print(T3 * self.Nm / self.mass / g)
-                found = True
-
-            I_fc.append(I_f)
-            V_fc.append(V_f)
-
-            P_fc.append(I_f * V_f)
+            V_f = self.fuelcell.get_current_voltage(self.Nm * P)[1]
 
             throt = self.esc.throttle(V, I, V_f)
             throttle.append(throt)
 
             I_e = self.esc.inputI(V, I, V_f)
+            I_f = I_e * self.Nm + I_other
             V_e = self.esc.inputV(V_f, I_f, 0.1)
 
             I_esc.append(I_e)
             V_esc.append(V_e)
+
+            V_fc.append(V_f)
+            I_fc.append(I_f)
+
+            P_f = V_f * I_f
+            P_fc.append(P_f)
+
+            if P_f > 1000:
+                print()
+
+            if P_f > P_max and found is False:
+                T3 = T
+                N3 = N
+                print(T3 * self.Nm / self.mass / g)
+                found = True
 
         T1 = self.mass * g / self.Nm
         T2 = self.mass * 2 * g / self.Nm
@@ -561,30 +567,30 @@ class Drone:
         plt.xlabel('RPM [-]')
         plt.ylabel('Efficiency [-]')
 
-        T_err = mean_squared_error(T, T_model, squared=False)
-        M_err = mean_squared_error(M, M_model, squared=False)
-        P_err = mean_squared_error(P, P_model, squared=False)
-        eta_err = mean_squared_error(eta, eta_model, squared=False)
-
-        T_mean = np.mean(T_model)
-        M_mean = np.mean(M_model)
-        P_mean = np.mean(P_model)
-        eta_mean = np.mean(eta_model)
-
-        print('Thrust Error', T_err)
-        print('Moment Error', M_err)
-        print('Power Error', P_err)
-        print('Eff Error', eta_err)
-
-        print(T_mean)
-        print(M_mean)
-        print(P_mean)
-        print(eta_mean)
-
-        print(T_err/T_mean)
-        print(M_err/M_mean)
-        print(P_err/P_mean)
-        print(eta_err/eta_mean)
+        # T_err = mean_squared_error(T, T_model, squared=False)
+        # M_err = mean_squared_error(M, M_model, squared=False)
+        # P_err = mean_squared_error(P, P_model, squared=False)
+        # eta_err = mean_squared_error(eta, eta_model, squared=False)
+        #
+        # T_mean = np.mean(T_model)
+        # M_mean = np.mean(M_model)
+        # P_mean = np.mean(P_model)
+        # eta_mean = np.mean(eta_model)
+        #
+        # print('Thrust Error', T_err)
+        # print('Moment Error', M_err)
+        # print('Power Error', P_err)
+        # print('Eff Error', eta_err)
+        #
+        # print(T_mean)
+        # print(M_mean)
+        # print(P_mean)
+        # print(eta_mean)
+        #
+        # print(T_err/T_mean)
+        # print(M_err/M_mean)
+        # print(P_err/P_mean)
+        # print(eta_err/eta_mean)
 
         plt.tight_layout()
         plt.show()

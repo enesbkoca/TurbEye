@@ -4,10 +4,8 @@ from src.propeller import Propeller
 from src.motor import Motor
 from src.drone import Drone
 from src.esc import ESC
-from src.power import HydrogenTank
 
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 
 
@@ -82,7 +80,6 @@ class ShelfESC(ESC):
 
 if __name__ == "__main__":
     prop = ShelfPropeller("T-Motor NS 26x85")
-    # prop = ShelfPropeller("T-Motor MF2211")
     motor = ShelfMotor("T-Motor Antigravity MN6007II KV320")
     esc = ShelfESC("T-Motor FLAME 60A")
 
@@ -91,3 +88,6 @@ if __name__ == "__main__":
     print(drone.motor)
     print(drone.mass)
     print(drone.compute_endurance(1, mh2=0.12))
+
+    drone.plot_PT()
+    drone.plot_ESC_FC()
