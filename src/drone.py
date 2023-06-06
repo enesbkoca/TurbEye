@@ -148,7 +148,7 @@ class Drone:
 
         return I / self.motor.Immax
 
-    def compute_endurance(self, av_t, co_eff=0.9, tw_f=1.2, mh2=None, Ppay=None):
+    def compute_endurance(self, av_t, co_eff=0.9, tw_f=1.2, mh2=0.12, Ppay=None):
         if mh2 is None:
             E = self.hyd.mh2 * self.hyd.U
             T_req_m = self.mass * g / self.Nm / co_eff * av_t
