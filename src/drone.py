@@ -379,9 +379,6 @@ class Drone:
             P_f = V_f * I_f
             P_fc.append(P_f)
 
-            if P_f > 1000:
-                print()
-
             if P_f > P_max and found is False:
                 T3 = T
                 N3 = N

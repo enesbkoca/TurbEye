@@ -1,12 +1,15 @@
 
-
 g = 9.80665  # gravitational acceleration
-
 
 components = {
     "Fuelcell": {
         "name": "A-2000",
         "mass": 3.0,
+        "power": 0
+    },
+    "Brackets": {
+        "name": "Brackets of the fuel cell",
+        "mass": 0.080,
         "power": 0
     },
     "Pressure regulator": {
@@ -24,6 +27,11 @@ components = {
         "mass": 0.470,
         "power": 0
     },
+    "Battery enclosing": {
+        "name": "Enclosing of the backup battery",
+        "mass": 0.100,
+        "power": 0
+    },
     "LIDAR": {
         "name": "Livox Mid-360",
         "mass": 0.265,
@@ -36,7 +44,7 @@ components = {
     },
     "IMU": {
         "name": "MICROSTRAIN 3DM-CV7-AHRS",
-        "mass": 0.083,
+        "mass": 0.0083,
         "power": 280E-3
     },
     "Flight Computer": {
@@ -46,8 +54,8 @@ components = {
     },
     "GPS": {
         "name": "HGLRC M100 MINI GPS",
-        "mass": 0.027,
-        "power": 0.2
+        "mass": 0.0027 * 2,
+        "power": 0.2 * 2
     },
     "Transmitter": {
         "name": "SIYI FM30",
@@ -74,9 +82,14 @@ components = {
         "mass": 0,
         "power": 0
     },
+    "Cables": {
+        "name": "Custom Cable",
+        "mass": 0.0493,
+        "power": 0
+    },
     "Chassis": {
         "name": "Custom Chassis",
-        "mass": 0.5,
+        "mass": 1.5,
         "power": 10
     }
 }
