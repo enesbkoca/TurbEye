@@ -5,13 +5,14 @@ from shelf_drone import ShelfMotor, ShelfESC, ShelfPropeller
 
 import matplotlib.pyplot as plt
 
+
 class SpeedRange(Drone):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.S_x = 85000E-6  # Front surface area
-        self.S_y = 14700E-6  # Side surface area
+        self.S_y = 147000E-6  # Side surface area
         self.S_z = 209500E-6  # Top surface area
-        self.Cd = 2
+        self.Cd_array = np.arange(0.6, 1.09, 0.1)
 
         self.compute_sides()
 
@@ -49,21 +50,34 @@ class SpeedRange(Drone):
         area = y * self.a
         return area
 
-    def speed(self, pitch):
+    def speed(self, pitch, Cd):
         pitch_rad = pitch * pi / 180
-        return (2 * self.mass * 9.80665 * tan(pitch_rad) / (1.225 * self.surface_area(pitch) * self.Cd)) ** 0.5
+        return (2 * self.mass * 9.80665 * tan(pitch_rad) / (1.225 * self.surface_area(pitch) * Cd)) ** 0.5
 
-    def range(self, pitch):
+    def range(self, pitch, Cd):
         pitch_rad = pitch * pi / 180
         TW_ratio = 1 / cos(pitch_rad)
 
         endurance = self.compute_endurance(TW_ratio)
-        speed = self.speed(pitch)
+        speed = self.speed(pitch, Cd)
 
         return endurance * speed * 3600
 
-    def plot_graph(self, x, y, xlabel, ylabel):
-        plt.plot(x, y)
+    def plot_graph(self, x, y, xlabel, ylabel, legend=False):
+        if not isinstance(y[0], np.ndarray):
+            y = np.array([y])
+
+        for idx, values in enumerate(y):
+            if legend:
+                label = "Cd = {:.2f}".format(self.Cd_array[idx])
+            else:
+                label = None
+
+            plt.plot(x, values, label=label)
+
+        if legend:
+            plt.legend(ncol=2)
+
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.tight_layout()
@@ -80,13 +94,23 @@ class SpeedRange(Drone):
 
     def plot_speed(self):
         x = np.arange(0, self.max_pitch(), 0.1)
-        y = np.array([self.speed(angle) for angle in x])
-        self.plot_graph(x, y, "Pitch angle [deg]", "Horizontal speed [m/s]")
+        y = np.empty((len(self.Cd_array)), dtype=np.ndarray)
+
+        for idx, cd in enumerate(self.Cd_array):
+            values = np.array([self.speed(angle, cd) for angle in x])
+            y[idx] = values
+
+        self.plot_graph(x, y, "Pitch angle [deg]", "Horizontal speed [m/s]", legend=True)
 
     def plot_range(self):
         x = np.arange(0, self.max_pitch(), 0.1)
-        y = np.array([self.range(angle) for angle in x]) / 1000
-        self.plot_graph(x, y, "Pitch angle [deg]", "Range [km]")
+        y = np.empty((len(self.Cd_array)), dtype=np.ndarray)
+
+        for idx, cd in enumerate(self.Cd_array):
+            values = np.array([self.range(angle, cd) for angle in x]) / 1000
+            y[idx] = values
+
+        self.plot_graph(x, y, "Pitch angle [deg]", "Range [km]", legend=True)
 
 
 if __name__ == "__main__":
