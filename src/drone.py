@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 # from sklearn.metrics import mean_squared_error
 
+from src.components import I_components, g, mass_components, power_components
 from src.propeller import Propeller
 from src.motor import Motor
 from src.power import HydrogenTank, FuelCell
@@ -11,34 +12,6 @@ from src.esc import ESC
 from src.configuration import configuration
 
 import matplotlib.pyplot as plt
-
-g = 9.80665
-
-# Mass budget inputs
-m_p = 0.64  # Mass of the payload
-m_3d = 1.15  # Mass of the 3D modelling system
-m_pos = 0.4  # Mass of the positioning system
-m_data = 0.02  # Mass of the data handling system
-m_rad = 0.05  # Mass of the radio system
-m_elec = 0.1  # Mass of the electrical components
-m_ch = 0.5  # Mass of the chassis
-
-# Mass of Hydrogen propulsion subsystem
-m_fc = 3  # Mass of the hydrogen fuel cell
-m_pr = 0.305  # Mass of the pressure regulator
-
-
-P_cam = 10
-P_ch = 5
-P_3d = 15
-P_pos = 1
-P_data = 20
-P_rad = 1
-P_elec = 5
-
-P_pay = P_cam + P_ch + P_3d + P_pos + P_data + P_rad + P_elec
-
-I_other = 1
 
 
 class Drone:
@@ -88,17 +61,9 @@ class Drone:
         m_motor = self.motor.mass * self.Nm  # Mass of the motors
         m_esc = self.esc.mass * self.Nm
         m_tot = (
-            m_p
+            mass_components
             + m_prop
             + m_motor
-            + m_3d
-            + m_pos
-            + m_data
-            + m_elec
-            + m_fc
-            + m_pr
-            + m_ch
-            + m_rad
             + m_esc
         )
         diff = 10000
@@ -110,24 +75,16 @@ class Drone:
             M = self.propeller.forces(self.N)[1]
             V, I = self.motor.VandI(M, self.N)
             P = V * I
-            self.P_tot = P * self.Nm * tw_f + P_pay
+            self.P_tot = P * self.Nm * tw_f + power_components
             E_tot = self.P_tot * self.T
             self.hyd = HydrogenTank(E_tot, tank_mass=tank_mass)
             m_hyd = self.hyd.tot_mass()
             m_new = (
-                m_p
+                mass_components
                 + m_prop
                 + m_motor
-                + m_3d
-                + m_pos
-                + m_data
-                + m_elec
-                + m_fc
-                + m_pr
-                + m_hyd
-                + m_ch
-                + m_rad
                 + m_esc
+                + m_hyd
             )
             diff = abs(m_new - m_tot)
             m_tot = m_new
@@ -162,7 +119,7 @@ class Drone:
         if Ppay is not None:
             P_tot = P * self.Nm * tw_f + Ppay
         else:
-            P_tot = P * self.Nm * tw_f + P_pay
+            P_tot = P * self.Nm * tw_f + power_components
         return E / P_tot
 
     def plot_endurance_TW(self):
@@ -248,7 +205,7 @@ class Drone:
             if self.motor.Immax < I and found is False:
                 T3 = T
                 N3 = N
-                print(T3*self.Nm/self.mass/g)
+                # print(T3*self.Nm/self.mass/g)
                 found = True
             T_motor.append(T)
             P_motor.append(P)
@@ -258,7 +215,7 @@ class Drone:
 
             eta_motor.append(M * N * 2 * np.pi / 60 / P)
 
-            P_tot = self.Nm * P + P_pay
+            P_tot = self.Nm * P + power_components
 
             I_f, V_f = self.fuelcell.get_current_voltage(P_tot)
 
@@ -410,7 +367,7 @@ class Drone:
             throttle.append(throt)
 
             I_e = self.esc.inputI(V, I, V_f)
-            I_f = I_e * self.Nm + I_other
+            I_f = I_e * self.Nm + I_components
             V_e = self.esc.inputV(V_f, I_f, 0.1)
 
             I_esc.append(I_e)
