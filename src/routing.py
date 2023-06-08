@@ -84,12 +84,13 @@ class DroneRoute(SpeedRange):
 
     def plot_route(self, route):
         for trip, m, t in route:
-            x = [i[0] for i in trip]
-            y = [i[1] for i in trip]
+            x = [i[0]/1000 for i in trip]
+            y = [i[1]/1000 for i in trip]
             plt.scatter(x, y)
             plt.plot(x, y)
         plt.axis('equal')
-        plt.xlabel('Distance')
+        plt.xlabel('Longitude Distance [km]')
+        plt.ylabel('Latitude Distance [km]')
         plt.show()
 
     def properties(self, route):
@@ -138,13 +139,18 @@ class DroneRoute(SpeedRange):
         else:
             timelist = prop['hrs of flight time']
         plt.hist(timelist)
+        plt.xlabel('Time per trip [h]')
         plt.show()
 
     def plot_trip_counter(self, prop=None):
+        fg = plt.Figure()
+        ax = fg.add_subplot()
+
         if prop is None:
             with open("../datasets/best_route.json", "r") as f:
                 counter = json.load(f)[1]['counter']
-        plt.bar(counter.keys(), counter.values())
+        ax.bar(counter.keys(), counter.values())
+        ax.yaxis.set_major_locator(plt.MaxNLocator(integer=True))
         plt.show()
 
 if __name__ == '__main__':
@@ -157,7 +163,7 @@ if __name__ == '__main__':
     esc = ShelfESC("T-Motor FLAME 60A")
 
     d = DroneRoute(propeller=prop, motor=motor, esc=esc, tank_mass=1.65)
-    d.save_and_load()
+    d.plot_trip_counter()
 
 
 
