@@ -64,10 +64,10 @@ class WindFarm:
 
     def windfarm_coordinates(self):
 
-        coordinates = np.empty((len(self.turbines)), dtype=tuple)
+        coordinates = np.empty((len(self.turbines), 2), dtype=np.ndarray)
 
         for idx, turbine in enumerate(self.turbines):
-            coordinates[idx] = tuple(turbine.get_xy())
+            coordinates[idx] = turbine.get_xy()
 
         return coordinates
 
