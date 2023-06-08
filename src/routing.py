@@ -158,12 +158,15 @@ if __name__ == '__main__':
     X = hornsea.coordinates
     X = X.astype('float')
 
+    X = np.random.randn(100, 2) * 20000
+
     prop = ShelfPropeller("T-Motor NS 26x85")
     motor = ShelfMotor("T-Motor Antigravity MN6007II KV160")
     esc = ShelfESC("T-Motor FLAME 60A")
 
     d = DroneRoute(propeller=prop, motor=motor, esc=esc, tank_mass=1.65)
-    d.plot_trip_counter()
+    route = d.find_route(X)
+    d.plot_route(route)
 
 
 
