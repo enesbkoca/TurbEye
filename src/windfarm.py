@@ -112,9 +112,7 @@ class WindFarm:
             print("Turbine not found")
 
 
-
-
 if __name__ == "__main__":
     hornsea = WindFarm()
-    hornsea.plot_farm()
+    # hornsea.plot_farm()
     print(hornsea.coordinates)
