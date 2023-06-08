@@ -3,3 +3,5 @@ black
 prettytable
 pandas
 matplotlib
+scipy
+ortools
