@@ -1,13 +1,18 @@
 import numpy as np
 from src.windfarm import WindFarm
+
+from functools import partial
+
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
 
 class VRPSolver:
-    def __init__(self, windfarm):
+    def __init__(self, windfarm, max_trips=50):
         self.windfarm = windfarm
-        self.coordinates = np.vstack((np.array([[0, 0]]), self.windfarm.coordinates)).astype('float')[0:10]
+        self.max_trips = max_trips
+        self.n_turbines = len(self.windfarm.turbines)
+        self.coordinates = np.vstack((np.tile(np.array([[0, 0]]), (self.max_trips, 1)), self.windfarm.coordinates)).astype('float')
         self.distance_matrix = self.compute_distance_matrix()
 
     def distance(self, from_index, to_index):
@@ -15,7 +20,6 @@ class VRPSolver:
 
     def compute_distance_matrix(self):
         X = self.coordinates
-        # x, y = self.coordinates[:, :1], self.coordinates[:, 1:]
         m = X.shape[0]
         dists = np.zeros((m, m))
         for i in range(m):
@@ -28,6 +32,13 @@ class VRPSolver:
         data["distance_matrix"] = self.distance_matrix
         data["num_vehicles"] = 1
         data["depot"] = 0
+        data["distance_spent_turbine"] = 40_820  # m
+        data["vehicle_max_distance"] = 27 * 60 * 60 * 3
+        data["demands"] = np.array([0] * self.max_trips + [1] * self.n_turbines)
+        data["n_locations"] = len(data["demands"])
+
+        self.data = data
+
         return data
 
     def print_solution(self, data, manager, routing, solution):
@@ -51,6 +62,43 @@ class VRPSolver:
         print('Maximum of the route distances: {}m'.format(max_route_distance))
 
     def run_model(self):
+        def create_distance_evaluator(data):
+            _distances = {}
+
+            for from_node in range(data['n_locations']):
+                _distances[from_node] = {}
+                for to_node in range(data["n_locations"]):
+                    if from_node == to_node:
+                        _distances[from_node][to_node] = 0
+                    elif from_node in range(self.max_trips) and to_node in range(self.max_trips):
+                        _distances[from_node][to_node] = data["vehicle_max_distance"]
+                    else:
+                        distance = self.distance_matrix[from_node][to_node]
+                        if to_node >= self.max_trips:
+                            distance += data['distance_spent_turbine']  # Inspection cost in distance
+
+                        _distances[from_node][to_node] = distance
+
+            def distance_evaluator(manager, from_node, to_node):
+                return _distances[manager.IndexToNode(from_node)][manager.IndexToNode(to_node)]
+
+            return distance_evaluator
+
+        def add_distance_dimension(routing, manager, data, distance_evaluator_index):
+            distance = "Distance"
+            routing.AddDimension(
+                distance_evaluator_index,
+                0,  # null slack
+                data['vehicle_max_distance'],
+                True, # start cumul to zero
+                distance
+            )
+
+            distance_dimension = routing.GetDimensionOrDie(distance)
+            # Try to minimize the max distance among vehicles.
+            # /!\ It doesn't mean the standard deviation is minimized
+            distance_dimension.SetGlobalSpanCostCoefficient(100)
+
         data = self.create_data_model()
 
         # Create routing index manager
@@ -60,29 +108,13 @@ class VRPSolver:
         # Create routing model
         routing = pywrapcp.RoutingModel(manager)
 
-        def distance_callback(from_index, to_index):
-            # Distance between two nodes
-            from_node = manager.IndexToNode(from_index)
-            to_node = manager.IndexToNode(to_index)
-            return data['distance_matrix'][from_node][to_node]
-
-        transit_callback_index = routing.RegisterTransitCallback(distance_callback)
-
-        # Define cost of each arc
-        routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
-
-        # Add distance constraint.
-        dimension_name = 'Distance'
-        routing.AddDimension(
-            transit_callback_index,
-            0,  # no slack
-            49000,  # max travel distance
-            True,  # start cumul to zero
-            dimension_name
+        distance_evaluator_index = routing.RegisterTransitCallback(
+            partial(create_distance_evaluator(data), manager)
         )
+        routing.SetArcCostEvaluatorOfAllVehicles(distance_evaluator_index)
 
-        distance_dimension = routing.GetDimensionOrDie(dimension_name)
-        distance_dimension.SetGlobalSpanCostCoefficient(100)
+        add_distance_dimension(routing, manager, data, distance_evaluator_index)
+
 
         # Setting first solution heuristic
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
@@ -100,6 +132,7 @@ class VRPSolver:
 
 
 if __name__ == "__main__":
-    hornsea = WindFarm()
-    vrpsolver = VRPSolver(hornsea)
+    hornsea = WindFarm(limit=6)
+    vrpsolver = VRPSolver(hornsea, max_trips=1)
+    print(vrpsolver.distance(0, 1) + vrpsolver.distance(1, 2) + vrpsolver.distance(2, 3) + vrpsolver.distance(3, 4) + vrpsolver.distance(4, 5) + vrpsolver.distance(5, 0))
     vrpsolver.run_model()

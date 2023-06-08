@@ -48,7 +48,8 @@ class OSS(WindTurbine):
 
 class WindFarm:
 
-    def __init__(self):
+    def __init__(self, limit=None):
+        self.limit = limit
         self.file = "../datasets/windfarm.csv"
 
         self.drone = SpeedRange(
@@ -74,15 +75,19 @@ class WindFarm:
     def read_file(self):
         with open(self.file, 'r') as f:
             header = f.readline()
-            for line in f:
+            for idx, line in enumerate(f):
                 identifier, item, long, lat = line.strip().split(",")
 
                 if item == "OSS":
                     self.oss = OSS(identifier, item, long, lat)
                 elif item == "WTG":
+                    if idx > self.limit - 1:
+                        continue
                     self.turbines.append(
                         WindTurbine(identifier, item, long, lat)
                     )
+
+
 
     def normalize(self):
         self.oss.y_n = 0
