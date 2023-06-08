@@ -1,6 +1,7 @@
 import re
 from functools import reduce
 from decimal import Decimal
+import numpy as np
 import matplotlib.pyplot as plt
 from src.shelf_drone import ShelfPropeller, ShelfMotor, ShelfESC
 from src.speed_range import SpeedRange
@@ -13,20 +14,26 @@ class WindTurbine:
         self.long = long
         self.lat = lat
 
-        self.x = self.transform_coordinate(self.lat)
-        self.y = self.transform_coordinate(self.long)
+        self.x = self.transform_coordinate(self.long)
+        self.y = self.transform_coordinate(self.lat)
+
+        self.x_n = None
+        self.y_n = None
 
     def transform_coordinate(self, coordinate):
+        # transform to meters
         nums = re.findall(r'\d+\.\d+|\d+', coordinate)
-        nums = list(map(lambda i: Decimal(i), nums))
-        # value = reduce(lambda a, b: (a + b/60), nums)
+        nums = list(map(lambda i: float(i), nums))
 
-        value = (nums[2] / 60 + nums[1]) / 60 + nums[0]
+        degrees = (nums[2] / 60 + nums[1]) / 60 + nums[0]
+        meters = 111139 * degrees
+        return meters
 
-        return value
-
-    def get_xy(self):
-        return self.x, self.y
+    def get_xy(self, normalized=True):
+        if normalized:
+            return np.array([self.x_n, self.y_n])
+        else:
+            return np.array([self.x, self.y])
 
     def __str__(self):
         return f"{self.id} | {self.item}"
@@ -66,14 +73,26 @@ class WindFarm:
                         WindTurbine(identifier, item, long, lat)
                     )
 
-    def plot_farm(self):
-        plt.plot(*self.oss.get_xy(), label="OSS", color="g", marker="D")
+    def normalize(self):
+        self.oss.y_n = 0
+        self.oss.x_n = 0
 
         for turbine in self.turbines:
-            plt.plot(*turbine.get_xy(), color="b", marker=".")
-            plt.text(*turbine.get_xy(), turbine.id)
+            turbine.y_n = turbine.y - self.oss.y
+            turbine.x_n = turbine.x - self.oss.x
+
+    def plot_farm(self, normalized=True):
+        if normalized:
+            self.normalize()
+
+        plt.plot(*self.oss.get_xy(normalized=True) / 1000, label="OSS", color="y", marker="D")
+
+        for turbine in self.turbines:
+            plt.plot(*turbine.get_xy(normalized=True) / 1000, color="m", marker=".")
+            # plt.text(*turbine.get_xy(), turbine.id)
 
         # plt.legend()
+        plt.axis('equal')
         plt.show()
 
     def get_turbine(self, identifier):
@@ -82,6 +101,8 @@ class WindFarm:
                 return turbine
         else:
             print("Turbine not found")
+
+
 
 
 if __name__ == "__main__":

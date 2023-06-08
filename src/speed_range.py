@@ -127,6 +127,7 @@ if __name__ == "__main__":
 
     sr = SpeedRange(propeller=prop, motor=motor, esc=esc, tank_mass=1.65)
 
+    print(sr.compute_endurance(1.5))
     sr.plot_area()
     sr.plot_speed()
     sr.plot_range()
