@@ -3,10 +3,19 @@ import matplotlib.pyplot as plt
 from src.shelf_drone import ShelfMotor, ShelfPropeller, ShelfESC
 from src.drone import Drone
 from src.speed_range import SpeedRange
+from src.windfarm import WindFarm
 import heapq
 
-inspection_time = 0.5  #hrs
-mh2 = 0.12  #kg
+class DroneRoute(SpeedRange):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.inspection_time = 0.5  # hrs
+        self.mh2 = 0.12  # kg
+
+
+inspection_time = 0.5  # hrs
+mh2 = 0.12  # kg
 
 prop = ShelfPropeller("T-Motor NS 26x85")
 motor = ShelfMotor("T-Motor Antigravity MN6007II KV160")
@@ -24,7 +33,9 @@ E_cr = P_cr / speed / 3600  # Wh/m
 max_dist = (E_tot-E_ins)/E_cr/2
 
 # Generate sample data
-X = np.random.randn(147, 2) * 30000  # Replace with your own dataset
+hornsea = WindFarm()
+X = hornsea.coordinates
+X = X.astype('float')
 
 # Calculate distances from origin
 distances = np.linalg.norm(X, axis=1)
