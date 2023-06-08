@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 from src.shelf_drone import ShelfMotor, ShelfPropeller, ShelfESC
 from src.drone import Drone
 from src.speed_range import SpeedRange
@@ -143,20 +144,24 @@ class DroneRoute(SpeedRange):
         plt.show()
 
     def plot_trip_counter(self, prop=None):
-        fg = plt.Figure()
-        ax = fg.add_subplot()
+        fig, ax = plt.subplots()
 
         if prop is None:
             with open("../datasets/best_route.json", "r") as f:
                 counter = json.load(f)[1]['counter']
-        ax.bar(counter.keys(), counter.values())
-        ax.yaxis.set_major_locator(plt.MaxNLocator(integer=True))
+
+        ax.bar(list(counter.keys())[::-1], list(counter.values())[::-1],
+               color=['c', 'm', 'y'])
+        plt.grid(which="major", axis="y", color='gray', linestyle="--", linewidth=1, alpha=0.8)
+        ax.set_yticks(np.arange(0, 21, 2))
+        plt.ylabel("Number of trips")
+        plt.xlabel("Turbines per trip")
         plt.show()
+
 
 if __name__ == '__main__':
     hornsea = WindFarm()
-    X = hornsea.coordinates
-    X = X.astype('float')
+    X = hornsea.coordinates.astype('float')
 
     prop = ShelfPropeller("T-Motor NS 26x85")
     motor = ShelfMotor("T-Motor Antigravity MN6007II KV160")
