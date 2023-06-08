@@ -1,27 +1,48 @@
 import numpy as np
-from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
+from src.shelf_drone import ShelfMotor, ShelfPropeller, ShelfESC
+from src.drone import Drone
+from src.speed_range import SpeedRange
+import heapq
 
-# Need to implement energy instead
-maxrange = 270 * 1000  # Max range by safety factor
-speed = 27
-inspection_time = 30 * 60
+inspection_time = 0.5  #hrs
+mh2 = 0.12  #kg
+
+prop = ShelfPropeller("T-Motor NS 26x85")
+motor = ShelfMotor("T-Motor Antigravity MN6007II KV160")
+esc = ShelfESC("T-Motor FLAME 60A")
+drone = Drone(propeller=prop, motor=motor, esc=esc, tank_mass=1.65)
+
+s = SpeedRange(propeller=prop, motor=motor, esc=esc, tank_mass=1.65)
+speed, angle = s.optimal_range_parameters(0.8)[1:]  # Max range by safety factor
+
+E_tot = mh2*34000  # Wh
+E_ins = drone.P_tot * inspection_time  # Wh
+P_cr = drone.compute_endurance(1/np.cos(angle*np.pi/180), Ptot=True)  # W
+E_cr = P_cr / speed / 3600  # Wh/m
+
+max_dist = (E_tot-E_ins)/E_cr/2
 
 # Generate sample data
-np.random.seed(1)
-X = np.random.randn(200, 2) * 30000  # Replace with your own dataset
+X = np.random.randn(147, 2) * 30000  # Replace with your own dataset
 
 # Calculate distances from origin
 distances = np.linalg.norm(X, axis=1)
+
+if np.max(distances) > max_dist:
+    print(len(np.where(distances > max_dist)[0]), 'of the turbines is/are unreachable')
+    X = np.delete(X, np.where(distances > max_dist), axis=0)
+    distances = np.delete(distances, np.where(distances > max_dist))
 
 visited = []
 left = X.copy()
 distancesleft = distances.copy()
 route = []
+t = 0
 
 # Define the dynamic cluster size threshold
 while len(left) > 0:
-    dist = 0
+    E = 0
     start = (0, 0)
     return_back = False
     closestindex = np.argmin(distancesleft)
@@ -31,68 +52,36 @@ while len(left) > 0:
     while not return_back:
         dest = left[closestindex]
         left = np.delete(left, closestindex, axis=0)
-        dist += dest_dist
+        E += dest_dist * E_cr
+        t += dest_dist / speed / 3600
         visited.append(dest)
         trip.append(dest)
         start = dest
-        dist += inspection_time * speed
+        E += E_ins
+        t += inspection_time
         if len(left) == 0:
-            dist += np.linalg.norm(dest)
+            E += np.linalg.norm(dest) * E_cr
+            t += np.linalg.norm(dest) / speed / 3600
             break
         new_dist = np.linalg.norm(left - start, axis=1)
         closestindex = np.argmin(new_dist)
-        pot_dist = dist + new_dist[closestindex] + np.linalg.norm(left[closestindex]) + inspection_time * speed
-        if pot_dist > maxrange or len(left) == 0:
-            dist += np.linalg.norm(dest)
+        pot_E = E + new_dist[closestindex]*E_cr + np.linalg.norm(left[closestindex])*E_cr + E_ins
+        if pot_E > E_tot:
+            E += np.linalg.norm(dest) * E_cr
             return_back = True
         else:
             dest_dist = new_dist[closestindex]
             distancesleft = np.delete(distancesleft, closestindex)
-    if dist > maxrange:
-        print('Range exceeds maximum')
+    if E > E_tot:
+        print('Range exceeds maximum', E, E_tot)
     trip.append((0, 0))
     x = [i[0] for i in trip]
     y = [i[1] for i in trip]
     plt.scatter(x, y)
     plt.plot(x, y)
-    route.append((trip, dist))
-print(len(route))
+    route.append((trip, E/34000))
+
+print(len(route), 'trips')
+print(sum(n for _, n in route), 'kg H2')
+print(t, 'hrs of flight time')
 plt.show()
-
-
-
-
-
-
-
-#
-#
-# four = X[distances <= threshold]
-# four_size = len(four)//4
-# kmeans4 = KMeans(n_clusters=four_size)
-# kmeans4.fit(four)
-# labels4 = kmeans4.labels_
-#
-# plt.scatter(four[:, 0], four[:, 1], c=labels4, cmap='viridis')
-# plt.show()
-#
-# # Determine the cluster size for each point
-# cluster_sizes = np.where(distances <= threshold, 4, 1)
-#
-#
-# # Modify k-means algorithm with custom cluster sizes
-# kmeans = KMeans(n_clusters=len(cluster_sizes))
-# kmeans.fit(X, sample_weight=cluster_sizes)
-
-# # Get cluster labels and centroids
-# labels = kmeans.labels_
-# centroids = kmeans.cluster_centers_
-#
-# # Plot the clusters
-# plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='viridis')
-# # plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='red')
-# plt.title('Modified k-means Clustering')
-# plt.xlabel('X')
-# plt.ylabel('Y')
-# plt.legend()
-# plt.show()

@@ -112,6 +112,13 @@ class SpeedRange(Drone):
 
         self.plot_graph(x, y, "Pitch angle [deg]", "Range [km]", legend=True)
 
+    def optimal_range_parameters(self, cd):
+        x = np.arange(0, self.max_pitch(), 0.1)
+        range = np.array([self.range(angle, cd) for angle in x])
+        angle = x[np.argmax(range)]
+        speed = self.speed(angle, cd)
+        return np.max(range), speed, angle
+
 
 if __name__ == "__main__":
     prop = ShelfPropeller("T-Motor NS 26x85")
