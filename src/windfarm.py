@@ -59,6 +59,17 @@ class WindFarm:
         self.turbines = []
         self.oss = None
         self.read_file()
+        self.normalize()
+        self.coordinates = self.windfarm_coordinates()
+
+    def windfarm_coordinates(self):
+
+        coordinates = np.empty((len(self.turbines)), dtype=tuple)
+
+        for idx, turbine in enumerate(self.turbines):
+            coordinates[idx] = turbine.get_xy()
+
+        return coordinates
 
     def read_file(self):
         with open(self.file, 'r') as f:
@@ -82,8 +93,6 @@ class WindFarm:
             turbine.x_n = turbine.x - self.oss.x
 
     def plot_farm(self, normalized=True):
-        if normalized:
-            self.normalize()
 
         plt.plot(*self.oss.get_xy(normalized=True) / 1000, label="OSS", color="y", marker="D")
 
@@ -108,4 +117,4 @@ class WindFarm:
 if __name__ == "__main__":
     hornsea = WindFarm()
     hornsea.plot_farm()
-    print()
+    print(hornsea.coordinates)
