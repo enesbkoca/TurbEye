@@ -23,7 +23,7 @@ class WindTurbine:
     def transform_coordinate(self, coordinate):
         # transform to meters
         nums = re.findall(r'\d+\.\d+|\d+', coordinate)
-        nums = list(map(lambda i: np.double(i), nums))
+        nums = list(map(lambda i: np.float64(i), nums))
 
         degrees = (nums[2] / 60 + nums[1]) / 60 + nums[0]
         meters = 111139 * degrees
