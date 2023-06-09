@@ -10,9 +10,9 @@ from ortools.constraint_solver import pywrapcp
 
 
 class VRPSolver:
-    def __init__(self, windfarm, drone, n_trips=35):
+    def __init__(self, windfarm, drone_route, n_trips=35):
         self.windfarm = windfarm
-        self.drone = drone
+        self.drone = drone_route
         self.n_trips = n_trips
         self.n_turbines = len(self.windfarm.turbines)
         self.coordinates = np.vstack((np.array([[0, 0]]), self.windfarm.coordinates)).astype('float')
