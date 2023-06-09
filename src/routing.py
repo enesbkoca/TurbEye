@@ -153,7 +153,7 @@ class DroneRoute(SpeedRange):
                 timelist = json.load(f)[1]['hrs of flight time']
         else:
             timelist = prop['hrs of flight time']
-        plt.hist(timelist)
+        plt.hist(timelist, bins=20, rwidth=0.9)
         plt.xlabel('Time per trip [h]')
         plt.show()
 
@@ -168,17 +168,17 @@ class DroneRoute(SpeedRange):
                 counter = json.load(f)[1]['counter']
         else:
             counter = prop['counter']
-        counter = sorted(counter.items(), key=lambda x: x[0])
+        s_counter = sorted(counter.items(), key=lambda x: x[0])
         x_arr = []
         y_arr = []
-        for x, y in counter:
+        for x, y in s_counter:
             x_arr.append(x)
             y_arr.append(y)
 
         ax.bar(x_arr, y_arr,
                color=['r', 'c', 'm', 'y'])
         plt.grid(which="major", axis="y", color='gray', linestyle="--", linewidth=1, alpha=0.8)
-        ax.set_yticks(np.arange(0, 21, 2))
+        ax.set_yticks(np.arange(0, max(counter.values()) + 3, 2))
         plt.ylabel("Number of trips")
         plt.xlabel("Turbines per trip")
         plt.show()
@@ -196,8 +196,8 @@ if __name__ == '__main__':
     # route = d.save_and_load(no_of_iterations=2)[0]
     with open("../datasets/vrp_solution.json", "r") as f:
         routenew, prop = json.load(f)
-    # d.plot_time_hist(vrp=True)
-    d.plot_trip_counter(vrp=True)
+    d.plot_time_hist(vrp=True)
+    # d.plot_trip_counter(vrp=True)
 
     # print([dist for trip, m, t, dist in route])
     # print(sum(dist for trip, m, t, dist in route))
