@@ -155,4 +155,4 @@ if __name__ == "__main__":
 
     hornsea = WindFarm(limit=None)
     vrpsolver = VRPSolver(hornsea, drone_route, n_trips=35)
-    vrpsolver.run_model(max_runtime=1)
+    vrpsolver.run_model(max_runtime=10)
