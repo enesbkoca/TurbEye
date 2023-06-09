@@ -92,12 +92,14 @@ class DroneRoute(SpeedRange):
         return route
 
     def plot_route(self, route):
+        plt.figure(figsize=(20, 6))
         for trip, m, t in route:
             x = [i[0]/1000 for i in trip]
             y = [i[1]/1000 for i in trip]
             plt.scatter(x, y)
             plt.plot(x, y)
         plt.axis('equal')
+        # plt.ylim((-15, 10))
         plt.xlabel('Longitude Distance [km]')
         plt.ylabel('Latitude Distance [km]')
         plt.show()
@@ -142,9 +144,12 @@ class DroneRoute(SpeedRange):
             json.dump((route, prop), f)
         return route, prop
 
-    def plot_time_hist(self, prop=None):
-        if prop is None:
+    def plot_time_hist(self, prop=None, vrp=False):
+        if prop is None and vrp is False:
             with open("../datasets/best_route.json", "r") as f:
+                timelist = json.load(f)[1]['hrs of flight time']
+        elif vrp:
+            with open("../datasets/vrp_solution.json", "r") as f:
                 timelist = json.load(f)[1]['hrs of flight time']
         else:
             timelist = prop['hrs of flight time']
@@ -152,11 +157,14 @@ class DroneRoute(SpeedRange):
         plt.xlabel('Time per trip [h]')
         plt.show()
 
-    def plot_trip_counter(self, prop=None):
+    def plot_trip_counter(self, prop=None, vrp=False):
         fig, ax = plt.subplots()
 
-        if prop is None:
+        if prop is None and vrp is False:
             with open("../datasets/best_route.json", "r") as f:
+                counter = json.load(f)[1]['counter']
+        elif vrp:
+            with open("../datasets/vrp_solution.json", "r") as f:
                 counter = json.load(f)[1]['counter']
         else:
             counter = prop['counter']
@@ -179,7 +187,12 @@ if __name__ == '__main__':
     esc = ShelfESC("T-Motor FLAME 60A")
 
     d = DroneRoute(propeller=prop, motor=motor, esc=esc, tank_mass=1.65)
-    route = d.save_and_load(no_of_iterations=2)[0]
+    # route = d.save_and_load(no_of_iterations=2)[0]
+    with open("../datasets/vrp_solution.json", "r") as f:
+        routenew, prop = json.load(f)
+    # d.plot_time_hist(vrp=True)
+    d.plot_trip_counter(vrp=True)
+
     # print([dist for trip, m, t, dist in route])
     # print(sum(dist for trip, m, t, dist in route))
     # print(d.properties(route))
