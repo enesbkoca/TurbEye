@@ -94,13 +94,18 @@ class WindFarm:
 
     def plot_farm(self, normalized=True):
 
-        plt.plot(*self.oss.get_xy(normalized=True) / 1000, label="OSS", color="y", marker="D")
+        plt.scatter(self.oss.get_xy(normalized=True)[0] / 1000, self.oss.get_xy(normalized=True)[1] / 1000,
+                    label="OSS", color="y", marker="D")
 
-        for turbine in self.turbines:
-            plt.plot(*turbine.get_xy(normalized=True) / 1000, color="m", marker=".")
-            # plt.text(*turbine.get_xy(), turbine.id)
+        plt.scatter([turbine.get_xy(normalized=True)[0]/1000 for turbine in self.turbines] ,
+                    [turbine.get_xy(normalized=True)[1]/1000 for turbine in self.turbines] ,
+                    color="m", label="Turbine", marker=".")
+        # plt.text(*turbine.get_xy(), turbine.id)
 
         # plt.legend()
+        plt.xlabel('Longitudinal Distance [km]')
+        plt.ylabel('Latitudinal Distance [km]')
+        plt.legend()
         plt.axis('equal')
         plt.show()
 
@@ -114,5 +119,5 @@ class WindFarm:
 
 if __name__ == "__main__":
     hornsea = WindFarm()
-    # hornsea.plot_farm()
-    print(hornsea.coordinates)
+    hornsea.plot_farm()
+    # print(hornsea.coordinates)

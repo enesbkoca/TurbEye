@@ -26,7 +26,7 @@ class DroneRoute(SpeedRange):
 
         self.max_dist = (self.E_tot - self.E_ins) / self.E_cr / 2
 
-    def find_route(self, X, rand=False, n=2):
+    def find_route(self, X, rand=False, n=2, return_dist=False):
         # Calculate distances from origin
         distances = np.linalg.norm(X, axis=1)
 
@@ -44,6 +44,7 @@ class DroneRoute(SpeedRange):
         while len(left) > 0:
             E = 0
             t = 0
+            dist = 0
             start = (0, 0)
             return_back = False
             closestindex = np.argmin(distancesleft)
@@ -55,6 +56,7 @@ class DroneRoute(SpeedRange):
                 left = np.delete(left, closestindex, axis=0)
                 E += dest_dist * self.E_cr
                 t += dest_dist / self.speed / 3600
+                dist += dest_dist
                 visited.append(dest)
                 trip.append(dest.tolist())
                 start = dest
@@ -63,6 +65,7 @@ class DroneRoute(SpeedRange):
                 if len(left) == 0:
                     E += np.linalg.norm(dest) * self.E_cr
                     t += np.linalg.norm(dest) / self.speed / 3600
+                    dist += np.linalg.norm(dest)
                     break
                 new_dist = np.linalg.norm(left - start, axis=1)
                 if rand and len(new_dist) > n-1:
@@ -73,6 +76,8 @@ class DroneRoute(SpeedRange):
                 pot_E = E + new_dist[closestindex] * self.E_cr + np.linalg.norm(left[closestindex]) * self.E_cr + self.E_ins
                 if pot_E > self.E_tot:
                     E += np.linalg.norm(dest) * self.E_cr
+                    t += np.linalg.norm(dest) / self.speed / 3600
+                    dist += np.linalg.norm(dest)
                     return_back = True
                 else:
                     dest_dist = new_dist[closestindex]
@@ -80,7 +85,10 @@ class DroneRoute(SpeedRange):
             if E > self.E_tot:
                 print('Range exceeds maximum', E, self.E_tot)
             trip.append((0, 0))
-            route.append((trip, E / 34000, t))
+            if return_dist:
+                route.append((trip, E / 34000, t, dist))
+            else:
+                route.append((trip, E / 34000, t))
         return route
 
     def plot_route(self, route):
@@ -126,6 +134,7 @@ class DroneRoute(SpeedRange):
         if load:
             with open("../datasets/best_route.json", "r") as f:
                 best = json.load(f)
+                print(best)
         route, prop = self.find_best_route(X, no_of_iterations=no_of_iterations, no_of_neighbors=no_of_neighbors, best=best)
         if plot:
             self.plot_route(route)
@@ -149,9 +158,11 @@ class DroneRoute(SpeedRange):
         if prop is None:
             with open("../datasets/best_route.json", "r") as f:
                 counter = json.load(f)[1]['counter']
+        else:
+            counter = prop['counter']
 
         ax.bar(list(counter.keys())[::-1], list(counter.values())[::-1],
-               color=['c', 'm', 'y'])
+               color=['r', 'c', 'm', 'y'])
         plt.grid(which="major", axis="y", color='gray', linestyle="--", linewidth=1, alpha=0.8)
         ax.set_yticks(np.arange(0, 21, 2))
         plt.ylabel("Number of trips")
@@ -163,15 +174,13 @@ if __name__ == '__main__':
     hornsea = WindFarm()
     X = hornsea.coordinates.astype('float')
 
-    X = np.random.randn(100, 2) * 20000
-
     prop = ShelfPropeller("T-Motor NS 26x85")
     motor = ShelfMotor("T-Motor Antigravity MN6007II KV160")
     esc = ShelfESC("T-Motor FLAME 60A")
 
     d = DroneRoute(propeller=prop, motor=motor, esc=esc, tank_mass=1.65)
-    route = d.find_route(X)
-    d.plot_route(route)
-
-
+    route = d.save_and_load(no_of_iterations=2)[0]
+    # print([dist for trip, m, t, dist in route])
+    # print(sum(dist for trip, m, t, dist in route))
+    # print(d.properties(route))
 
