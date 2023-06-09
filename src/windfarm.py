@@ -1,4 +1,5 @@
 import re
+from components import *
 from functools import reduce
 from decimal import Decimal
 import numpy as np
@@ -86,8 +87,6 @@ class WindFarm:
                         WindTurbine(identifier, item, long, lat)
                     )
 
-
-
     def normalize(self):
         self.oss.y_n = 0
         self.oss.x_n = 0
@@ -97,20 +96,29 @@ class WindFarm:
             turbine.x_n = turbine.x - self.oss.x
 
     def plot_farm(self, normalized=True):
+        fig, ax = plt.subplots(figsize=(12, 4))
+        plt.axis('equal')
+        # plt.gca().set_ylim([-15, 9])
+        ax.set_xlim([-22, 53])
 
-        plt.scatter(self.oss.get_xy(normalized=True)[0] / 1000, self.oss.get_xy(normalized=True)[1] / 1000,
-                    label="OSS", color="y", marker="D")
+        ax.scatter(self.oss.get_xy(normalized=True)[0] / 1000, self.oss.get_xy(normalized=True)[1] / 1000,
+                    label="OSS", color=c4, marker="D", zorder=3, alpha=1)
 
-        plt.scatter([turbine.get_xy(normalized=True)[0]/1000 for turbine in self.turbines] ,
-                    [turbine.get_xy(normalized=True)[1]/1000 for turbine in self.turbines] ,
-                    color="m", label="Turbine", marker=".")
+        ax.scatter([turbine.get_xy(normalized=True)[0]/1000 for turbine in self.turbines],
+                    [turbine.get_xy(normalized=True)[1]/1000 for turbine in self.turbines],
+                    color=c3, label="Turbine", marker="o", zorder=3, alpha=0.8)
         # plt.text(*turbine.get_xy(), turbine.id)
 
-        # plt.legend()
+        plt.xticks(np.arange(-20, 60, 5))
+        plt.yticks(np.arange(-15, 15, 5))
+
+        plt.grid(True, axis="both", zorder=0, linewidth=0.3)
+        ax.axhline(linewidth=0.7, color='tab:gray', zorder=0)
+        ax.axvline(linewidth=0.7, color='tab:gray', zorder=0)
+
         plt.xlabel('Longitudinal Distance [km]')
         plt.ylabel('Latitudinal Distance [km]')
-        plt.legend()
-        plt.axis('equal')
+        plt.legend(loc='lower right')
         plt.show()
 
     def get_turbine(self, identifier):
