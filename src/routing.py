@@ -168,8 +168,14 @@ class DroneRoute(SpeedRange):
                 counter = json.load(f)[1]['counter']
         else:
             counter = prop['counter']
+        counter = sorted(counter.items(), key=lambda x: x[0])
+        x_arr = []
+        y_arr = []
+        for x, y in counter:
+            x_arr.append(x)
+            y_arr.append(y)
 
-        ax.bar(list(counter.keys())[::-1], list(counter.values())[::-1],
+        ax.bar(x_arr, y_arr,
                color=['r', 'c', 'm', 'y'])
         plt.grid(which="major", axis="y", color='gray', linestyle="--", linewidth=1, alpha=0.8)
         ax.set_yticks(np.arange(0, 21, 2))
