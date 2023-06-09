@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from src.shelf_drone import ShelfMotor, ShelfPropeller, ShelfESC
 from src.drone import Drone
+import pandas as pd
 from src.speed_range import SpeedRange
 from src.windfarm import WindFarm
 from collections import Counter
@@ -202,8 +203,7 @@ class DroneRoute(SpeedRange):
             x_arr.append(x)
             y_arr.append(y)
 
-        ax.bar(x_arr, y_arr,
-               color=['r', 'c', 'm', 'y'])
+        ax.bar(x_arr, y_arr, color=['r', 'c', 'm', 'y'])
         plt.grid(which="major", axis="y", color='gray', linestyle="--", linewidth=1, alpha=0.8)
         ax.set_yticks(np.arange(0, max(counter.values()) + 3, 2))
         plt.ylabel("Number of trips")
@@ -212,19 +212,21 @@ class DroneRoute(SpeedRange):
 
     def plot_all_counters(self):
         fig, ax = plt.subplots()
-        counter1 = self.properties(self.find_route(X))['counter']
+        counter1 = self.properties(self.find_route(X))['counter'].items()
         with open("../datasets/best_route.json", "r") as f:
-            counter2 = json.load(f)[1]['counter']
+            counter2 = json.load(f)[1]['counter'].items()
         with open("../datasets/vrp_solution.json", "r") as f:
             counter3 = json.load(f)[1]['counter']
-        s_counter = sorted(counter1.items(), key=lambda x: x[0])
-        x_arr = []
-        y_arr = []
-        for x, y in s_counter:
-            x_arr.append(x)
-            y_arr.append(y)
-
-        ax.bar(x_arr, y_arr, color=[c1, c2, c3, c4, c5])
+        df = pd.DataFrame({
+            '1': [counter1[0][1], 0, 0],
+            '2': [0, 0, counter3[0][1]],
+            '3': [counter1[1][1], counter2[0][1], counter3[1][1]],
+            '4': [counter1[2][1], counter2[1][1], counter3[2][1]],
+            '5': [counter1[3][1], counter2[2][1], counter3[3][1]],
+            '6': [0, 0, counter3[4][1]]
+        }, columns=["Original", "Improved", "VRP Model"])
+        print(df)
+        # df.plot.bar([x1, x2, x3], [y1, y2, y3], color=[c1, c2, c3, c4, c5], width=0.3)
         plt.grid(which="major", axis="y", color='gray', linestyle="--", linewidth=1, alpha=0.8)
         ax.set_yticks(np.arange(0, 20 + 3, 2))
         plt.ylabel("Number of trips")
