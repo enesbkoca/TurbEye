@@ -8,6 +8,7 @@ from src.windfarm import WindFarm
 from collections import Counter
 import heapq
 import json
+from components import *
 
 class DroneRoute(SpeedRange):
 
@@ -155,8 +156,32 @@ class DroneRoute(SpeedRange):
             timelist = prop['hrs of flight time']
 
         plt.hist(timelist, bins=20, rwidth=0.9)
-        plt.hist(timelist)
         plt.xlabel('Time per trip [h]')
+        plt.show()
+
+    def plot_all_hist(self, X):
+        timelist1 = self.properties(self.find_route(X))['hrs of flight time']
+        with open("../datasets/best_route.json", "r") as f:
+            timelist2 = json.load(f)[1]['hrs of flight time']
+        with open("../datasets/vrp_solution.json", "r") as f:
+            timelist3 = json.load(f)[1]['hrs of flight time']
+        w = 0.2
+        alpha = 0.2
+        # bins=np.arange(min(timelist1), max(timelist1) + w, w)
+        # bins = np.arange(1, 3, 0.2)
+
+        plt.yticks(np.arange(0, 35, 1))
+        plt.hist([timelist1, timelist2, timelist3], bins=6, edgecolor='black', histtype='bar', color=['#FFB000', '#FE6100', '#DC267F'], label=['Original', 'Improved', 'VRP'], zorder=2)
+        plt.grid(axis='y', linewidth=1, alpha=0.6, zorder=0)
+
+        # plt.hist(timelist1, bins=bins, alpha=alpha, color='c')
+        # plt.hist(timelist2, bins=bins, alpha=alpha, color='m')
+        # plt.hist(timelist3, bins=bins, alpha=alpha, color='y')
+
+        plt.xlabel('Time per trip [h]')
+        plt.ylabel('Number of trips [-]')
+        plt.legend()
+        plt.tight_layout()
         plt.show()
 
     def plot_trip_counter(self, prop=None, vrp=False):
@@ -185,6 +210,28 @@ class DroneRoute(SpeedRange):
         plt.xlabel("Turbines per trip")
         plt.show()
 
+    def plot_all_counters(self):
+        fig, ax = plt.subplots()
+        counter1 = self.properties(self.find_route(X))['counter']
+        with open("../datasets/best_route.json", "r") as f:
+            counter2 = json.load(f)[1]['counter']
+        with open("../datasets/vrp_solution.json", "r") as f:
+            counter3 = json.load(f)[1]['counter']
+        s_counter = sorted(counter1.items(), key=lambda x: x[0])
+        x_arr = []
+        y_arr = []
+        for x, y in s_counter:
+            x_arr.append(x)
+            y_arr.append(y)
+
+        ax.bar(x_arr, y_arr, color=[c1, c2, c3, c4, c5])
+        plt.grid(which="major", axis="y", color='gray', linestyle="--", linewidth=1, alpha=0.8)
+        ax.set_yticks(np.arange(0, 20 + 3, 2))
+        plt.ylabel("Number of trips")
+        plt.xlabel("Turbines per trip")
+        plt.show()
+
+
 
 if __name__ == '__main__':
     hornsea = WindFarm()
@@ -198,7 +245,7 @@ if __name__ == '__main__':
     # route = d.save_and_load(no_of_iterations=2)[0]
     with open("../datasets/vrp_solution.json", "r") as f:
         routenew, prop = json.load(f)
-    d.plot_time_hist(vrp=True)
+    d.plot_all_counters()
     # d.plot_trip_counter(vrp=True)
 
     # print([dist for trip, m, t, dist in route])

@@ -1,3 +1,9 @@
+c1 = "#FFB000"
+c2 = '#FE6100'
+c3 = '#DC267F'
+c4 = "#785EF0"
+c5 = '#648FFF'
+
 
 g = 9.80665  # gravitational acceleration
 
