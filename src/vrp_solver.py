@@ -29,13 +29,15 @@ class VRPSolver:
 
     def create_data_model(self):
         data = dict()
+        _capacity = 1000
         data["distance_matrix"] = self.distance_matrix
         data["num_vehicles"] = 1
         data["depot"] = 0
         data["distance_spent_turbine"] = 40_820  # m
         data["vehicle_max_distance"] = 27 * 60 * 60 * 3
-        data["demands"] = np.array([0] * self.max_trips + [1] * self.n_turbines)
+        data["demands"] = np.array([0] + [_capacity] * (self.max_trips - 1) + [1] * self.n_turbines)
         data["n_locations"] = len(data["demands"])
+        data["vehicle_capacity"] = _capacity
 
         self.data = data
 
@@ -84,13 +86,43 @@ class VRPSolver:
 
             return distance_evaluator
 
+        def create_demand_evaluator(data):
+            _demands = data["demands"]
+
+            def demand_evaluator(manager, from_node):
+                return _demands[manager.IndexToNode(from_node)]
+            return demand_evaluator
+
+        def add_capacity_constraints(routing, manager, data, demand_evaluator_index):
+            vehicle_capacity = data['vehicle_capacity']
+            capacity = 'Capacity'
+            routing.AddDimension(
+                demand_evaluator_index,
+                vehicle_capacity,
+                vehicle_capacity,
+                True,
+                capacity
+            )
+
+            capacity_dimension = routing.GetDimensionOrDie(capacity)
+
+            for node in range(self.max_trips):
+                node_index = manager.IndexToNode(node)
+                routing.AddDisjunction([node_index], 0)
+
+            for node in range(self.max_trips, len([data['demands']])):
+                node_index = manager.NodeToIndex(node)
+                capacity_dimension.SlackVar(node_index).SetValue(0)
+                routing.AddDisjunction([node_index], 100-000)
+
+
         def add_distance_dimension(routing, manager, data, distance_evaluator_index):
             distance = "Distance"
             routing.AddDimension(
                 distance_evaluator_index,
                 0,  # null slack
                 data['vehicle_max_distance'],
-                True, # start cumul to zero
+                True,  # start cumul to zero
                 distance
             )
 
@@ -115,6 +147,9 @@ class VRPSolver:
 
         add_distance_dimension(routing, manager, data, distance_evaluator_index)
 
+        demand_evaluator_index = routing.RegisterUnaryTransitCallback(
+            partial(create_demand_evaluator(data), manager))
+        add_capacity_constraints(routing, manager, data, demand_evaluator_index)
 
         # Setting first solution heuristic
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
@@ -122,6 +157,9 @@ class VRPSolver:
             routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
         )
 
+        search_parameters.local_search_metaheuristic = (
+            routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH)
+        search_parameters.time_limit.FromSeconds(100)
         # Solve problem
         solution = routing.SolveWithParameters(search_parameters)
 
@@ -132,7 +170,7 @@ class VRPSolver:
 
 
 if __name__ == "__main__":
-    hornsea = WindFarm(limit=6)
-    vrpsolver = VRPSolver(hornsea, max_trips=1)
-    print(vrpsolver.distance(0, 1) + vrpsolver.distance(1, 2) + vrpsolver.distance(2, 3) + vrpsolver.distance(3, 4) + vrpsolver.distance(4, 5) + vrpsolver.distance(5, 0))
+    hornsea = WindFarm(limit=8)
+    vrpsolver = VRPSolver(hornsea, max_trips=5)
+    # print(vrpsolver.distance(0, 1) + vrpsolver.distance(1, 2) + vrpsolver.distance(2, 3) + vrpsolver.distance(3, 4) + vrpsolver.distance(4, 5) + vrpsolver.distance(5, 0))
     vrpsolver.run_model()
