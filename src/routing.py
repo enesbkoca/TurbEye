@@ -154,6 +154,8 @@ class DroneRoute(SpeedRange):
         else:
             timelist = prop['hrs of flight time']
         plt.hist(timelist, bins=20, rwidth=0.9)
+        plt.hist(timelist)
+        # Rando comment
         plt.xlabel('Time per trip [h]')
         plt.show()
 
