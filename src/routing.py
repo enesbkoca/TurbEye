@@ -153,7 +153,7 @@ class DroneRoute(SpeedRange):
                 timelist = json.load(f)[1]['hrs of flight time']
         else:
             timelist = prop['hrs of flight time']
-        #ADfsdfsdasdsads
+        #ADfsdfsdasdsadsaifoweinie
         plt.hist(timelist, bins=20, rwidth=0.9)
         plt.hist(timelist)
         # Rando comment
