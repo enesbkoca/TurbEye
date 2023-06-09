@@ -49,9 +49,8 @@ class OSS(WindTurbine):
 class WindFarm:
 
     def __init__(self, limit=None):
-        self.limit = limit
         self.file = "../datasets/windfarm.csv"
-
+        self.limit = limit
         self.drone = SpeedRange(
             propeller=ShelfPropeller("T-Motor NS 26x85"),
             motor=ShelfMotor("T-Motor Antigravity MN6007II KV160"),
@@ -81,7 +80,7 @@ class WindFarm:
                 if item == "OSS":
                     self.oss = OSS(identifier, item, long, lat)
                 elif item == "WTG":
-                    if idx > self.limit - 1:
+                    if self.limit and idx > self.limit - 1:
                         continue
                     self.turbines.append(
                         WindTurbine(identifier, item, long, lat)
