@@ -41,6 +41,10 @@ class VRPSolver:
         data["n_locations"] = len(data["distance_matrix"])
         return data
 
+    def save_as_json(self, routes):
+        with open("../datasets/vrp_solution.json", "w") as f:
+            json.dump((routes, self.drone.properties(routes)), f)
+
     def print_solution(self, data, manager, routing, solution):
         """Prints solution on console."""
         # print(f'Objective: {solution.ObjectiveValue()}')
@@ -62,6 +66,7 @@ class VRPSolver:
                 index = solution.Value(routing.NextVar(index))
                 route_distance += routing.GetArcCostForVehicle(
                     previous_index, index, vehicle_id)
+
             trip.append(list(self.coordinates[manager.IndexToNode(index)]))
             actual_distance = route_distance - data['distance_spent_turbine'] * (len(trip) - 2)
             hydro = (actual_distance * self.drone.E_cr + (len(trip) - 2) * self.drone.E_ins) / 34000
@@ -76,8 +81,7 @@ class VRPSolver:
             total_distance += route_distance
             max_route_distance = max(route_distance, max_route_distance)
 
-        with open("../datasets/vrp_solution.json", "w") as f:
-            json.dump((routes, []), f)
+        self.save_as_json(routes)
 
         total_distance -= len(self.windfarm.turbines) * data['distance_spent_turbine']
         print('Maximum of the route distances: {}m'.format(max_route_distance))
