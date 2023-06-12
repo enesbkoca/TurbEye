@@ -1,7 +1,5 @@
 import re
 from components import *
-from functools import reduce
-from decimal import Decimal
 import numpy as np
 import matplotlib.pyplot as plt
 from src.shelf_drone import ShelfPropeller, ShelfMotor, ShelfESC
@@ -96,18 +94,19 @@ class WindFarm:
             turbine.x_n = turbine.x - self.oss.x
 
     def plot_farm(self, normalized=True):
-        fig, ax = plt.subplots(figsize=(12, 4))
+        fig, ax = plt.subplots(figsize=(14, 4))
         plt.axis('equal')
         # plt.gca().set_ylim([-15, 9])
-        ax.set_xlim([-22, 53])
+        if normalized: ax.set_xlim([-22, 53])
+        ax.plot(self.oss.get_xy(normalized)[0] / 1000, self.oss.get_xy(normalized)[1] / 1000,
+                label="OSS", color=c4, marker="D", zorder=3, alpha=1, markersize=10)
 
-        ax.scatter(self.oss.get_xy(normalized=True)[0] / 1000, self.oss.get_xy(normalized=True)[1] / 1000,
-                    label="OSS", color=c4, marker="D", zorder=3, alpha=1)
+        ax.scatter([turbine.get_xy(normalized)[0]/1000 for turbine in self.turbines],
+                   [turbine.get_xy(normalized)[1]/1000 for turbine in self.turbines],
+                   color=c2, label="Turbine", marker="o", zorder=3, alpha=0.8)
 
-        ax.scatter([turbine.get_xy(normalized=True)[0]/1000 for turbine in self.turbines],
-                    [turbine.get_xy(normalized=True)[1]/1000 for turbine in self.turbines],
-                    color=c3, label="Turbine", marker="o", zorder=3, alpha=0.8)
-        # plt.text(*turbine.get_xy(), turbine.id)
+        # for turbine in self.turbines:
+        #     plt.text(turbine.get_xy(normalized)[0]/1000, turbine.get_xy(normalized)[1]/1000, turbine.id)
 
         plt.xticks(np.arange(-20, 60, 5))
         plt.yticks(np.arange(-15, 15, 5))
@@ -118,7 +117,7 @@ class WindFarm:
 
         plt.xlabel('Longitudinal Distance [km]')
         plt.ylabel('Latitudinal Distance [km]')
-        plt.legend(loc='lower right')
+        plt.legend(loc='lower right', borderpad=0.8)
         plt.show()
 
     def get_turbine(self, identifier):
