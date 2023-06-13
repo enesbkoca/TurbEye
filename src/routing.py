@@ -1,15 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
 from src.shelf_drone import ShelfMotor, ShelfPropeller, ShelfESC
-from src.drone import Drone
-import pandas as pd
 from src.speed_range import SpeedRange
 from src.windfarm import WindFarm
-from collections import Counter
+from collections import Counter, defaultdict
 import heapq
 import json
 from components import *
+
 
 class DroneRoute(SpeedRange):
 
@@ -104,6 +102,7 @@ class DroneRoute(SpeedRange):
         # plt.ylim((-15, 10))
         plt.xlabel('Longitude Distance [km]')
         plt.ylabel('Latitude Distance [km]')
+        plt.tight_layout()
         plt.show()
 
     def properties(self, route):
@@ -161,23 +160,17 @@ class DroneRoute(SpeedRange):
         plt.show()
 
     def plot_all_hist(self, X):
+        fig, ax = plt.subplots(figsize=(10, 6))
+
         timelist1 = self.properties(self.find_route(X))['hrs of flight time']
         with open("../datasets/best_route.json", "r") as f:
             timelist2 = json.load(f)[1]['hrs of flight time']
         with open("../datasets/vrp_solution.json", "r") as f:
             timelist3 = json.load(f)[1]['hrs of flight time']
-        w = 0.2
-        alpha = 0.2
-        # bins=np.arange(min(timelist1), max(timelist1) + w, w)
-        # bins = np.arange(1, 3, 0.2)
 
-        plt.yticks(np.arange(0, 35, 1))
-        plt.hist([timelist1, timelist2, timelist3], bins=6, edgecolor='black', histtype='bar', color=['#FFB000', '#FE6100', '#DC267F'], label=['Original', 'Improved', 'VRP'], zorder=2)
+        ax.set_yticks(np.arange(0, 20 + 3, 2))
+        plt.hist([timelist1, timelist2, timelist3], bins=6, edgecolor='black', histtype='bar', color=['#FFB000', '#FE6100', '#DC267F'], label=['Original', 'Improved', 'OR-Tools'], zorder=2)
         plt.grid(axis='y', linewidth=1, alpha=0.6, zorder=0)
-
-        # plt.hist(timelist1, bins=bins, alpha=alpha, color='c')
-        # plt.hist(timelist2, bins=bins, alpha=alpha, color='m')
-        # plt.hist(timelist3, bins=bins, alpha=alpha, color='y')
 
         plt.xlabel('Time per trip [h]')
         plt.ylabel('Number of trips [-]')
@@ -211,28 +204,43 @@ class DroneRoute(SpeedRange):
         plt.show()
 
     def plot_all_counters(self):
-        fig, ax = plt.subplots()
-        counter1 = self.properties(self.find_route(X))['counter'].items()
+        def def_value():
+            return 0
+        barWidth = 0.3
+        no_of_columns = 6
+        fig, ax = plt.subplots(figsize=(10, 6))
+        counter1 = self.properties(self.find_route(X))['counter']
+        counter1 = defaultdict(def_value, {int(k): int(v) for k, v in counter1.items()})
         with open("../datasets/best_route.json", "r") as f:
-            counter2 = json.load(f)[1]['counter'].items()
+            counter2 = json.load(f)[1]['counter']
+            counter2 = defaultdict(def_value, {int(k): int(v) for k, v in counter2.items()})
         with open("../datasets/vrp_solution.json", "r") as f:
             counter3 = json.load(f)[1]['counter']
-        df = pd.DataFrame({
-            '1': [counter1[0][1], 0, 0],
-            '2': [0, 0, counter3[0][1]],
-            '3': [counter1[1][1], counter2[0][1], counter3[1][1]],
-            '4': [counter1[2][1], counter2[1][1], counter3[2][1]],
-            '5': [counter1[3][1], counter2[2][1], counter3[3][1]],
-            '6': [0, 0, counter3[4][1]]
-        }, columns=["Original", "Improved", "VRP Model"])
-        print(df)
-        # df.plot.bar([x1, x2, x3], [y1, y2, y3], color=[c1, c2, c3, c4, c5], width=0.3)
+            counter3 = defaultdict(def_value, {int(k): int(v) for k, v in counter3.items()})
+        br1 = np.arange(no_of_columns)
+        br2 = [x + barWidth for x in br1]
+        br3 = [x + barWidth for x in br2]
+
+        x1 = []
+        x2 = []
+        x3 = []
+        for i in range(no_of_columns):
+            x1.append(counter1[i+1])
+            x2.append(counter2[i+1])
+            x3.append(counter3[i+1])
+
+        plt.bar(br1, x1, color=c1, width=0.3, edgecolor='black', label='Original')
+        plt.bar(br2, x2, color=c2, width=0.3, edgecolor='black', label='Improved')
+        plt.bar(br3, x3, color=c3, width=0.3, edgecolor='black', label='OR-Tools')
         plt.grid(which="major", axis="y", color='gray', linestyle="--", linewidth=1, alpha=0.8)
-        ax.set_yticks(np.arange(0, 20 + 3, 2))
+        ax.set_yticks(np.arange(0, 22 + 3, 2))
+        plt.xticks([r + barWidth for r in range(no_of_columns)],
+                   range(1, 7))
         plt.ylabel("Number of trips")
         plt.xlabel("Turbines per trip")
+        plt.legend()
+        plt.tight_layout()
         plt.show()
-
 
 
 if __name__ == '__main__':
@@ -244,13 +252,11 @@ if __name__ == '__main__':
     esc = ShelfESC("T-Motor FLAME 60A")
 
     d = DroneRoute(propeller=prop, motor=motor, esc=esc, tank_mass=1.65)
-    # route = d.save_and_load(no_of_iterations=2)[0]
     with open("../datasets/vrp_solution.json", "r") as f:
-        routenew, prop = json.load(f)
-    d.plot_all_counters()
-    # d.plot_trip_counter(vrp=True)
+        route = json.load(f)[0]
+    d.plot_route(route)
 
-    # print([dist for trip, m, t, dist in route])
-    # print(sum(dist for trip, m, t, dist in route))
-    # print(d.properties(route))
+
+
+
 
