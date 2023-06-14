@@ -2,7 +2,7 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-# from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error
 import matplotlib as mpl
 
 from src.components import I_components, g, mass_components, power_components
@@ -155,8 +155,8 @@ class Drone:
         end_arr = []
         for avt in avt_arr:
             end_arr.append(self.compute_endurance(avt))
-        plt.plot(avt_arr, end_arr)
-        plt.title("Endurance - T/W Ratio Curve")
+        plt.plot(avt_arr, end_arr, color=c3, linewidth=2)
+        plt.grid()
         plt.xlabel("T/W Ratio [-]")
         plt.ylabel("Endurance [h]")
         plt.show()
@@ -525,54 +525,67 @@ class Drone:
         fig = plt.figure(figsize=[8, 6])
 
         ax1 = fig.add_subplot(2, 2, 1)
-        ax1.plot(N, M, label='Actual Values')
+        ax1.plot(N, M, label='Actual Values', linestyle="dashed", alpha=0.8)
         ax1.plot(N, M_model, label='Model')
+        plt.grid(which='major')
+        plt.xlim(left=0)
+        plt.ylim(bottom=0)
+
         plt.xlabel('RPM [-]')
         plt.ylabel('Torque [Nm]')
         plt.legend()
 
         ax2 = fig.add_subplot(2, 2, 2)
-        ax2.plot(N, T)
+        ax2.plot(N, T, linestyle="dashed", alpha=0.8)
         ax2.plot(N, T_model)
         plt.xlabel('RPM [-]')
         plt.ylabel('Thrust [N]')
+        plt.grid(which='major')
+        plt.xlim(left=0)
+        plt.ylim(bottom=0)
 
         ax3 = fig.add_subplot(2, 2, 3)
-        ax3.plot(N, P)
+        ax3.plot(N, P, linestyle="dashed", alpha=0.8)
         ax3.plot(N, P_model)
         plt.xlabel('RPM [-]')
         plt.ylabel('Power [W]')
+        plt.grid(which='major')
+        plt.xlim(left=0)
+        plt.ylim(bottom=0)
 
         ax4 = fig.add_subplot(2, 2, 4)
-        ax4.plot(N, eta)
+        ax4.plot(N, eta, linestyle="dashed", alpha=0.8)
         ax4.plot(N, eta_model)
         plt.xlabel('RPM [-]')
         plt.ylabel('Efficiency [-]')
+        plt.grid(which='major')
+        plt.xlim(left=0)
+        plt.ylim(bottom=0)
 
-        # T_err = mean_squared_error(T, T_model, squared=False)
-        # M_err = mean_squared_error(M, M_model, squared=False)
-        # P_err = mean_squared_error(P, P_model, squared=False)
-        # eta_err = mean_squared_error(eta, eta_model, squared=False)
-        #
-        # T_mean = np.mean(T_model)
-        # M_mean = np.mean(M_model)
-        # P_mean = np.mean(P_model)
-        # eta_mean = np.mean(eta_model)
-        #
-        # print('Thrust Error', T_err)
-        # print('Moment Error', M_err)
-        # print('Power Error', P_err)
-        # print('Eff Error', eta_err)
-        #
-        # print(T_mean)
-        # print(M_mean)
-        # print(P_mean)
-        # print(eta_mean)
-        #
-        # print(T_err/T_mean)
-        # print(M_err/M_mean)
-        # print(P_err/P_mean)
-        # print(eta_err/eta_mean)
+        T_err = mean_squared_error(T, T_model, squared=False)
+        M_err = mean_squared_error(M, M_model, squared=False)
+        P_err = mean_squared_error(P, P_model, squared=False)
+        eta_err = mean_squared_error(eta, eta_model, squared=False)
+
+        T_mean = np.mean(T_model)
+        M_mean = np.mean(M_model)
+        P_mean = np.mean(P_model)
+        eta_mean = np.mean(eta_model)
+
+        print('Thrust Error', T_err)
+        print('Moment Error', M_err)
+        print('Power Error', P_err)
+        print('Eff Error', eta_err)
+
+        print(T_mean)
+        print(M_mean)
+        print(P_mean)
+        print(eta_mean)
+
+        print(T_err/T_mean)
+        print(M_err/M_mean)
+        print(P_err/P_mean)
+        print(eta_err/eta_mean)
 
         plt.tight_layout()
         plt.show()

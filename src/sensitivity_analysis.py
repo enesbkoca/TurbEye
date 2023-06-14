@@ -2,6 +2,10 @@ import numpy as np
 from matplotlib import pyplot as plt
 from src.drone import Drone
 from copy import deepcopy
+import matplotlib as mpl
+from src.components import c1, c2, c3, c4, c5
+
+mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=[c3, c4, c5, 'black', c1, c2])
 
 
 class SensitivityAnalysis:

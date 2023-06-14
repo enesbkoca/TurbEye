@@ -125,7 +125,7 @@ if __name__ == "__main__":
     motor = ShelfMotor("T-Motor Antigravity MN6007II KV160")
     esc = ShelfESC("T-Motor FLAME 60A")
 
-    sr = SpeedRange(propeller=prop, motor=motor, esc=esc, tank_mass=1.65)
+    sr = SpeedRange(propeller=prop, motor=motor, esc=esc, tank_mass=1.65, mh2=0.12)
 
     print(sr.compute_endurance(1.5))
     sr.plot_area()

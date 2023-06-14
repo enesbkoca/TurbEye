@@ -1,8 +1,7 @@
 import json
 from prettytable import PrettyTable
 from src.drone import Drone
-from src.shelf_drone import ShelfPropeller, ShelfMotor
-
+from src.shelf_drone import ShelfPropeller, ShelfMotor, ShelfESC
 
 class DroneCombinator:
     motors = None
@@ -27,8 +26,8 @@ class DroneCombinator:
             for prop_name in self.propellers:
                 motor = ShelfMotor(motor_name)
                 propeller = ShelfPropeller(prop_name)
-
-                drone = Drone(propeller=propeller, motor=motor)
+                esc = ShelfESC("T-Motor FLAME 60A")
+                drone = Drone(propeller=propeller, motor=motor, esc=esc)
 
                 if drone.mass:
                     self.drones.append(drone)

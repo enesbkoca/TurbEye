@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from src.components import *
 
 
 class HydrogenTank:
@@ -80,16 +81,16 @@ class FuelCell:
         plt.minorticks_on()
 
         ax2 = ax1.twinx()
-        ax1.plot(I, V, "y")
+        ax1.plot(I, V, color=c2)
 
-        ax2.plot(I, P, "m")
+        ax2.plot(I, P, color=c4)
         ax1.set_xlim(0, 75)
         ax1.set_ylim(0, 55)
         ax2.set_ylim(0, 3000)
 
         ax1.set_xlabel("Current [A]")
-        ax1.set_ylabel("Voltage [V]", color="y")
-        ax2.set_ylabel("Power [W]", color="m")
+        ax1.set_ylabel("Voltage [V]", color=c2)
+        ax2.set_ylabel("Power [W]", color=c4)
 
         plt.tight_layout()
         plt.show()
