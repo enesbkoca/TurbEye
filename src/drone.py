@@ -3,8 +3,10 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 # from sklearn.metrics import mean_squared_error
+import matplotlib as mpl
 
 from src.components import I_components, g, mass_components, power_components
+from src.components import c1, c2, c3, c4, c5
 from src.propeller import Propeller
 from src.motor import Motor
 from src.power import HydrogenTank, FuelCell
@@ -12,6 +14,9 @@ from src.esc import ESC
 from src.configuration import configuration
 
 import matplotlib.pyplot as plt
+
+
+mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=[c1, c2, c3, c4, c5])
 
 
 class Drone:
@@ -180,10 +185,10 @@ class Drone:
         if verts:
             for i, vert in enumerate(verts):
                 if vertlabels:
-                    plt.plot([vert, vert], [0, max(y) * 1.1], label=vertlabels[i])
+                    plt.plot([vert, vert], [0, max(y) * 1.1], label=vertlabels[i], linestyle='dashed', linewidth=1.5)
                     ax.legend()
                 else:
-                    plt.plot([vert, vert], [0, max(y) * 1.1])
+                    plt.plot([vert, vert], [0, max(y) * 1.1], linestyle='dashed', linewidth=1.5)
 
         if xlimit:
             plt.xlim(xlimit)
