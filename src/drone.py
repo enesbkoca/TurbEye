@@ -21,7 +21,8 @@ class Drone:
         propeller: Optional[Propeller] = None,
         motor: Optional[Motor] = None,
         esc: Optional[ESC] = None,
-        tank_mass: Optional[float] = None
+        tank_mass: Optional[float] = None,
+        mh2: Optional[float] = None
     ) -> None:
         if not config:
             config = configuration.copy()
@@ -52,23 +53,55 @@ class Drone:
         self.fuelcell = FuelCell()
 
         self._config = config
-        self.mass = self.compute_weight(tank_mass=tank_mass)
+        self.mass = self.compute_weight(tank_mass=tank_mass, mh2=mh2)
 
     def compute_weight(
-        self, max_iter: int = 1000, tw_f=1.2, co_eff=0.9, tank_mass=None
+        self, max_iter: int = 1000, tw_f=1.2, co_eff=0.9, tank_mass=None, mh2=None
     ) -> Optional[float]:
         m_prop = self.propeller.mass * self.Nm  # Mass of the propellers
         m_motor = self.motor.mass * self.Nm  # Mass of the motors
         m_esc = self.esc.mass * self.Nm
-        m_tot = (
-            mass_components
-            + m_prop
-            + m_motor
-            + m_esc
-        )
-        diff = 10000
-        i = 0
-        while diff > 0.001:
+        if tank_mass is None and mh2 is None:
+            m_tot = (
+                mass_components
+                + m_prop
+                + m_motor
+                + m_esc
+            )
+            diff = 10000
+            i = 0
+            while diff > 0.001:
+                T_req = m_tot * g
+                T_req_m = T_req / self.Nm / co_eff
+                self.N = self.propeller.required_rpm(T_req_m)
+                M = self.propeller.forces(self.N)[1]
+                V, I = self.motor.VandI(M, self.N)
+                P = V * I
+                self.P_tot = P * self.Nm * tw_f + power_components
+                E_tot = self.P_tot * self.T
+                self.hyd = HydrogenTank(E_tot, tank_mass=tank_mass)
+                m_hyd = self.hyd.tot_mass()
+                m_new = (
+                    mass_components
+                    + m_prop
+                    + m_motor
+                    + m_esc
+                    + m_hyd
+                )
+                diff = abs(m_new - m_tot)
+                m_tot = m_new
+                i += 1
+                if i == max_iter:
+                    return None
+        else:
+            m_tot = (
+                    mass_components
+                    + m_prop
+                    + m_motor
+                    + m_esc
+                    + mh2
+                    + tank_mass
+            )
             T_req = m_tot * g
             T_req_m = T_req / self.Nm / co_eff
             self.N = self.propeller.required_rpm(T_req_m)
@@ -77,20 +110,7 @@ class Drone:
             P = V * I
             self.P_tot = P * self.Nm * tw_f + power_components
             E_tot = self.P_tot * self.T
-            self.hyd = HydrogenTank(E_tot, tank_mass=tank_mass)
-            m_hyd = self.hyd.tot_mass()
-            m_new = (
-                mass_components
-                + m_prop
-                + m_motor
-                + m_esc
-                + m_hyd
-            )
-            diff = abs(m_new - m_tot)
-            m_tot = m_new
-            i += 1
-            if i == max_iter:
-                return None
+            self.hyd = HydrogenTank(E_tot, tank_mass=tank_mass, mh2=mh2)
 
         self.I_ratio = self.check_for_max(m_tot, co_eff)
 

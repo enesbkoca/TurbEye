@@ -83,12 +83,11 @@ if __name__ == "__main__":
     motor = ShelfMotor("T-Motor Antigravity MN6007II KV160")
     esc = ShelfESC("T-Motor FLAME 60A")
 
-    drone = Drone(propeller=prop, motor=motor, esc=esc, tank_mass=1.65)
+    drone = Drone(propeller=prop, motor=motor, esc=esc, tank_mass=1.65, mh2=0.12)
 
     print(drone.propeller)
     print(drone.motor)
     print(drone.mass)
+    print(drone.hyd.tot_mass())
     print(drone.compute_endurance(1, mh2=0.12))
 
-    drone.plot_PT()
-    drone.plot_ESC_FC()

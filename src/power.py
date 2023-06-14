@@ -3,9 +3,12 @@ import matplotlib.pyplot as plt
 
 
 class HydrogenTank:
-    def __init__(self, E, tank_mass=None):
+    def __init__(self, E, tank_mass=None, mh2=None):
         self.U = 34000
-        self.mh2 = E / self.U
+        if mh2 is None:
+            self.mh2 = E / self.U
+        else:
+            self.mh2 = mh2
         self.tm = tank_mass
 
     def tank_mass(self):
