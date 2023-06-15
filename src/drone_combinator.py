@@ -39,7 +39,7 @@ class DroneCombinator:
         return self.drones
 
     def print_drones(self, count: int = 5, upper_limit: float = 12):
-        table = PrettyTable(("i", "Propeller", "Motor", "Mass", "RPM", "Current Ratio"))
+        table = PrettyTable(("i", "Propeller", "Motor", "Mass", "RPM", "Current Ratio", 'Mass of Hydrogen'))
 
         for idx, drone in enumerate(self.drones[:count]):
             if drone.mass > upper_limit:
@@ -53,6 +53,7 @@ class DroneCombinator:
                     f"{drone.mass:.2f} kg",
                     f"{drone.N:.2f} rpm",
                     f"{drone.I_ratio:.2f}",
+                    f"{drone.hyd.mh2:.3f}"
                 )
             )
 
@@ -69,5 +70,5 @@ class DroneCombinator:
 
 if __name__ == "__main__":
     combinations = DroneCombinator()
-    combinations.print_drones(count=20, upper_limit=15)
+    combinations.print_drones(count=10, upper_limit=15)
     combinations.get_csv()

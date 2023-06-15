@@ -16,7 +16,7 @@ class HydrogenTank:
         if self.tm is not None:
             return self.tm
         else:
-            return 41.187 * self.mh2**2 + 8.38 * self.mh2 + 1.0587
+            return 24.064 * self.mh2**2 + 0.4 * self.mh2 + 1.3
 
     def tot_mass(self):
         return self.mh2 + self.tank_mass()
