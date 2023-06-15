@@ -5,7 +5,8 @@ from copy import deepcopy
 import matplotlib as mpl
 from src.components import c1, c2, c3, c4, c5
 
-mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=[c3, c4, c5, 'black', c1, c2])
+mpl.rcParams['axes.prop_cycle'] = (mpl.cycler(color=[c3, c4, c5, c1, c2] * 2) +
+                                   mpl.cycler(linestyle=['solid'] * 5 + ['dashed'] * 5))
 
 
 class SensitivityAnalysis:
@@ -24,7 +25,7 @@ class SensitivityAnalysis:
         self.parameters = []
 
     def generate_drones(self, type, parameter):
-        if "Bp" == parameter or "Nm" == parameter:
+        if parameter in ["Nm", "Bp", "TW_R", "Immax"]:
             return
 
         mass = []
@@ -82,8 +83,9 @@ class SensitivityAnalysis:
             Drone.plot(
                 fig, x, y, "Parameter Diff [%]", "Mass Diff [%]", label=legend_name
             )
-        plt.legend()
+        plt.legend(ncols=2, loc='lower right')
         plt.tight_layout()
+        plt.ylim(-5, None)
         plt.show()
 
         if refresh:
@@ -99,4 +101,4 @@ if __name__ == "__main__":
 
     for i in range(3):
         sens.perform_analysis(typeindex=i)
-        sens.plot()
+    sens.plot()
