@@ -66,7 +66,7 @@ class Drone:
         m_prop = self.propeller.mass * self.Nm  # Mass of the propellers
         m_motor = self.motor.mass * self.Nm  # Mass of the motors
         m_esc = self.esc.mass * self.Nm
-        if tank_mass is None and mh2 is None:
+        if mh2 is None:
             m_tot = (
                 mass_components
                 + m_prop

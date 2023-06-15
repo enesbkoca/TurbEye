@@ -3,6 +3,7 @@ from prettytable import PrettyTable
 from src.drone import Drone
 from src.shelf_drone import ShelfPropeller, ShelfMotor, ShelfESC
 
+
 class DroneCombinator:
     motors = None
     propellers = None
@@ -46,7 +47,7 @@ class DroneCombinator:
 
             table.add_row(
                 (
-                    idx,
+                    idx + 1,
                     drone.propeller,
                     drone.motor,
                     f"{drone.mass:.2f} kg",
@@ -61,7 +62,12 @@ class DroneCombinator:
     def __getitem__(self, item):
         return self.drones[item]
 
+    def get_csv(self):
+        with open("../datasets/combinator.csv", 'w') as f:
+            f.write(self.table.get_csv_string())
+
 
 if __name__ == "__main__":
     combinations = DroneCombinator()
     combinations.print_drones(count=20, upper_limit=15)
+    combinations.get_csv()

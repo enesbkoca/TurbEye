@@ -91,8 +91,9 @@ if __name__ == "__main__":
     # print(drone.hyd.tot_mass())
     # print(drone.compute_endurance(1, mh2=0.12))
 
-    # drone.plot_PT()
+    drone.plot_PT()
+    drone.plot_ESC_FC()
 
     # drone.validation()
 
-    drone.plot_endurance_TW()
+    # drone.plot_endurance_TW()
